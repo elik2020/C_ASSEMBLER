@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "macro_table.h": "c",
+        "files.h": "c",
+        "pre_assembler.h": "c",
+        "stdio.h": "c"
+    }
+}

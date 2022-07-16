@@ -1,9 +1,9 @@
-#include <main.h>
+#include "main.h"
 
 int main(int argc, char** argv){
     int i;
     if(argc == 1){
-        printf("No file was given");
+        printf("No file was given\n");
         return 0;
     }else{
         for(i = 1;i<argc;i++){
