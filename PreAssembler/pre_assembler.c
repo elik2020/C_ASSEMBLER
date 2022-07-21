@@ -13,21 +13,20 @@ int check_macro(char* line,FILE* asFile,macro_table** head,FILE* amFile){
     char* lineSeparated;
     int startIndex;   
 
-    lineSeparated = strtok(line," ");/*we get the first word in the line*/
+    lineSeparated = strtok(line,SPACES_AND_NEWLINE);/*we get the first word in the line*/
+    printf("\nthe start: %s\n",lineSeparated);
     
-
     if((*head) != NULL && lineSeparated != NULL && strcmp(lineSeparated,"macro") != 0){/*If the line is not a macro definition*/
-        
-        lineSeparated[strlen(lineSeparated) - 1] = 0;
         if(in_macro_table(*head,lineSeparated)){/*We check if it's a macro name*/
+        
             replace_macro(*head,lineSeparated,amFile,asFile);/*If it is we copy the content of the macro to the am file*/
             return 1;
         }
         return 0;
-    }else if(strcmp(lineSeparated,"macro") == 0){/*If the line is a macro definition*/
-
+    }else if(lineSeparated != NULL&&strcmp(lineSeparated,"macro") == 0){/*If the line is a macro definition*/
+        
         lineSeparated = strtok(NULL,"\n");/*The name of the macro*/
-
+        
         startIndex = ftell(asFile);/*The index where the content of the macro start*/
 
         add_to_macro_table(head,lineSeparated,asFile,startIndex);/*We add the macro to the macro table*/
@@ -80,13 +79,13 @@ void add_to_macro_table(macro_table** head,char* macroName,FILE* asFile,int star
     int endIndex;
 
     line = get_line(asFile);
-    lineStart = strtok(line," ");/*we get the first word in the line*/
+    lineStart = strtok(line,SPACES);/*we get the first word in the line*/
 
     while(strcmp(lineStart,"endmacro\n") != 0){/*we check if we got to the end of the macro definition*/
         free(line);
         endIndex = ftell(asFile)-1;/*We save every time the end index so we have the index where the macro content ends*/
         line = get_line(asFile);
-        lineStart = strtok(line," ");
+        lineStart = strtok(line,SPACES);
     }
     free(line);
     newMacro = createMacro(macroName,startIndex,endIndex);/*we create a new macro node*/
@@ -111,7 +110,7 @@ void pre_assembler(char* fileNmae){
         return;
     }
 
-    amFile = open_file(fileNmae,".am","w");   /**/
+    amFile = open_file(fileNmae,".am","w");
 
     while((line = get_line(asFile)) != NULL){
         originalLine = (char*)malloc(strlen(line)+1);/*We copy the line because the strtok will change the line later*/
