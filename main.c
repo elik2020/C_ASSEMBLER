@@ -8,6 +8,7 @@ int main(int argc, char** argv){
     }else{
         for(i = 1;i<argc;i++){
             pre_assembler(argv[i]);
+            beautycheck(argv[i]);
         }
     }
     return 0;
