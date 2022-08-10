@@ -1,0 +1,5 @@
+;miss of a space
+MAIN: not r2
+add r2,STR
+MAIN: movS1.1,LENGTH
+add r2,STR
