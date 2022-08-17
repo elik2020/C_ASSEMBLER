@@ -43,3 +43,27 @@ int inSymbolTable(symbolTable* head,char* symbolName){
     return 0;
 }
 
+int checkLabel(char* word){
+    if(word[strlen(word)-1] == ':' && checkLabelName(word)){
+        word[strlen(word)-1] = '\0';
+        return 1;
+    }
+    return 0;
+
+    
+}
+
+int checkLabelName(char* name){
+    int i = 0;
+
+    if(is_system_word(name) && isalpha(name[0]) && strlen(name) <= LABEL_LEN){
+        for(i = 0;i<strlen(name);i++){
+            if(isalpha(name[i]) || isdigit(name[i])){
+                return 0;
+            }
+        }
+        return 1;
+    }
+    return 0;
+}
+

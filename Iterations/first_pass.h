@@ -5,7 +5,7 @@
 #include "../Utility/files.h"
 #include "../Utility/symbol_table.h"
 
-
+symbolTable first_pass(char* fileName,int* errorFound,int* entryFound);
 
 
 #endif 

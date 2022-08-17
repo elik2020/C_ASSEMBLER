@@ -31,3 +31,43 @@ void removeWhiteSpaces(char line[LINE_LEN]){
     }
     line[j] = '\0';
 }
+
+
+int ignoreLine(char* line){
+    removeWhiteSpaces(line);
+    return line[0] == ';' || line[0] == '\0' || line[0] == '\n';
+}
+
+void copyCurrentWord(char *word, char *line)
+{
+    int i = 0;
+    if (word == NULL || line == NULL)
+        return;
+
+    while (i < LINE_LEN && !isspace(line[i]) && line[i] != '\0') /* Copy the courant first word in the line until a space */
+    {
+        word[i] = line[i];
+        i++;
+    }
+    word[i] = '\0';
+}
+
+void toNextWord(char *line)
+{
+    int i = 0;
+    if (line == NULL)
+        return NULL;
+    /* Skip rest of characters in the line (until a space) */
+    while (!isspace(line[i]) && !end_of_line(line)){
+        line++;
+        i++;
+    }
+                      
+    removeWhiteSpaces(line); /* Skip the spaces or tubs */
+
+    
+}
+
+int is_system_word(char* word){
+    return isRegister(word) || isDirective(word) || isOperation(word);
+}

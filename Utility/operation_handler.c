@@ -1,0 +1,35 @@
+
+
+static const struct operationTable{
+
+    const char *name;
+    unsigned int opcode;
+    unsigned int operandNum;
+    unsigned int first_operand_valid[NUM_OF_ADDRESSINGS];
+    unsigned int second_operand_valid[NUM_OF_ADDRESSINGS];
+} operationTable[] = {{"mov",0,2,{1,1,1,1},{0,1,1,1}},
+                      {"cmp",1,2,{1,1,1,1},{1,1,1,1}},
+                      {"add",2,2,{1,1,1,1},{0,1,1,1}},
+                      {"sub",3,2,{1,1,1,1},{0,1,1,1}},
+                      {"not",4,1,{0,0,0,0},{0,1,1,1}},
+                      {"clr",5,1,{0,0,0,0},{0,1,1,1}},
+                      {"lea",6,2,{0,1,1,0},{0,1,1,1}},
+                      {"inc",7,1,{0,0,0,0},{0,1,1,1}},
+                      {"dec",8,1,{0,0,0,0},{0,1,1,1}},
+                      {"jmp",9,1,{0,0,0,0},{0,1,1,1}},
+                      {"bne",10,1,{0,0,0,0},{0,1,1,1}},
+                      {"get",11,1,{0,0,0,0},{0,1,1,1}},
+                      {"prn",12,1,{0,0,0,0},{0,1,1,1}},
+                      {"jsr",13,1,{0,0,0,0},{0,1,1,1}},
+                      {"rts",14,0,{0,0,0,0},{0,0,0,0}},
+                      {"hlt",15,0,{0,0,0,0},{0,0,0,0}}};
+
+int isOperation(char* name){
+    int i;
+    for(i = 0;i<NUM_OF_OPERATIONS;i++){
+        if(strcmp(name,operationTable[i]) == 0){
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
