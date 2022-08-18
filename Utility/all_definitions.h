@@ -14,6 +14,7 @@
 #define REGISTER_NAME_LENGTH 2
 #define NUM_OF_OPERATIONS 16
 #define NUM_OF_DIRECTIVES 5
+#define SPACES " \t\n\v\f\r"
 
 
 typedef enum boolean{FALSE,TRUE} boolean;

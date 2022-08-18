@@ -19,7 +19,7 @@ int is_number(char number[])
     return TRUE;
 }
 
-void removeWhiteSpaces(char line[LINE_LEN]){
+void removeLeftWhiteSpaces(char line[LINE_LEN]){
     int i = 0, j = 0;
     for(i = 0;  (line[i] == ' ' || line[i] == '\t') && i < strlen(line) ; i++){
         j = i;
@@ -32,9 +32,16 @@ void removeWhiteSpaces(char line[LINE_LEN]){
     line[j] = '\0';
 }
 
+void removeRightWhiteSpaces(char line[LINE_LEN]){
+    int i;
+    for(i = strlen(line)-1 && (line[i] == ' ' || line[i] == '\t');i>0;i--){
+        line[i] = '\0'
+    }
+}
+
 
 int ignoreLine(char* line){
-    removeWhiteSpaces(line);
+    removeLeftWhiteSpaces(line);
     return line[0] == ';' || line[0] == '\0' || line[0] == '\n';
 }
 
@@ -63,11 +70,15 @@ void toNextWord(char *line)
         i++;
     }
                       
-    removeWhiteSpaces(line); /* Skip the spaces or tubs */
+    removeLeftWhiteSpaces(line); /* Skip the spaces or tubs from the left*/
 
     
 }
 
 int is_system_word(char* word){
     return isRegister(word) || isDirective(word) || isOperation(word);
+}
+
+void printError(char* error,int line,char* fileName){
+    printf("%s in line: %d in file: %s",error,line,fileName);
 }

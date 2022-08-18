@@ -13,7 +13,7 @@ symbolTable* createSymbol(char* symbolName,int IC)
 }
 
 
-void insertSymbolAtEnd(symbolTable** head,char* symbolName,int IC){
+symbolTable*  insertSymbolAtEnd(symbolTable** head,char* symbolName,int IC){
 
     symbolTable* newNode = createSymbol(symbolName,IC);
 
@@ -30,6 +30,8 @@ void insertSymbolAtEnd(symbolTable** head,char* symbolName,int IC){
         }
         temp->next = newNode;
 	}
+
+    return newNode;
 
 }
 
@@ -58,7 +60,7 @@ int checkLabelName(char* name){
 
     if(is_system_word(name) && isalpha(name[0]) && strlen(name) <= LABEL_LEN){
         for(i = 0;i<strlen(name);i++){
-            if(isalpha(name[i]) || isdigit(name[i])){
+            if(!isalpha(name[i]) && !isdigit(name[i])){
                 return 0;
             }
         }
@@ -66,4 +68,5 @@ int checkLabelName(char* name){
     }
     return 0;
 }
+
 

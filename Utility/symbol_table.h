@@ -11,5 +11,11 @@ typedef struct symbolTable{
     struct symbolTable* next;
 } symbolTable;
 
+typedef struct entryTable{
+    char name[LABEL_LEN];
+    int lineNum;
+    struct entryTable* next;
+} entryTable;
+
 
 #endif 

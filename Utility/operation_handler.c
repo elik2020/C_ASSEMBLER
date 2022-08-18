@@ -4,7 +4,7 @@ static const struct operationTable{
 
     const char *name;
     unsigned int opcode;
-    unsigned int operandNum;
+    unsigned int numOfOperands;
     unsigned int first_operand_valid[NUM_OF_ADDRESSINGS];
     unsigned int second_operand_valid[NUM_OF_ADDRESSINGS];
 } operationTable[] = {{"mov",0,2,{1,1,1,1},{0,1,1,1}},
@@ -27,9 +27,19 @@ static const struct operationTable{
 int isOperation(char* name){
     int i;
     for(i = 0;i<NUM_OF_OPERATIONS;i++){
-        if(strcmp(name,operationTable[i]) == 0){
+        if(strcmp(name,operationTable[i].name) == 0){
             return TRUE;
         }
     }
     return FALSE;
+}
+
+int amountOfOperands(char* name){
+    int i;
+    for(i = 0;i<NUM_OF_OPERATIONS;i++){
+        if(strcmp(name,operationTable[i].name) == 0){
+            return operationTable[i].numOfOperands;
+        }
+    }
+    return -1;
 }
