@@ -5,7 +5,7 @@ int isRegister(char *name)
     return strlen(name) == REGISTER_NAME_LENGTH && name[0] == 'r' && name[1] >= '0' && name[1] <= '7';
 }
 
-int is_number(char number[])
+int isNumber(char number[])
 {
     int i;
     if (number[0] == '-' || number[0] == '+' || isdigit(number[0])) /*whether the first character is a digit or a sign*/
@@ -14,8 +14,10 @@ int is_number(char number[])
             if (!isdigit(number[i]))
                 return FALSE;
     }
-    else
+    else{
         return FALSE;
+    }
+        
     return TRUE;
 }
 
@@ -81,4 +83,42 @@ int is_system_word(char* word){
 
 void printError(char* error,int line,char* fileName){
     printf("%s in line: %d in file: %s",error,line,fileName);
+}
+
+int endOfLine(char *line)
+{
+    return line == NULL || line[0] == '\0' || line[0] == '\n';
+}
+
+int addressingMethodType(char* operand,int lineNum){
+    char* afterDot;
+    char* beforeDot;
+    
+    if (operand[0] == '#')
+    {
+        if (isNumber(operand[1]))
+            return IMMEDIATE_ADDRESS;
+    }
+
+    if (checkLabelName(operand))
+    {
+        return DIRECT_ADDRESS;
+    }
+
+    if (is_register(operand))
+    {
+        return REGISTER_ADDRESS;
+    }
+
+    beforeDot = strtok(op, ".");
+    afterDot = strtok(NULL, ".");
+    if (checkLabelName(beforeDot))
+    {                                                       
+        if (strlen(afterDot) == 1 && (afterDot[0] == '1' || afterDot[0] == '2')){
+            return STRUCT_ADDRESS;
+        }
+            
+    }
+    printf("invalid addressing method in line",lineNum);
+    return addressingError;
 }

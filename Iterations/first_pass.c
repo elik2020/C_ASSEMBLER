@@ -62,7 +62,7 @@ symbolTable first_pass(char* fileName,int* errorFound,int* entryFound){
 
 }
 
-int operationHandler(int* IC,int lineNum,char* currentWord){
+int operationHandler(int* IC,int lineNum,char* theOperation){
 
     char firstOperand[LINE_LEN] = {0};
     char secondOperand[LINE_LEN] = {0};
@@ -70,20 +70,32 @@ int operationHandler(int* IC,int lineNum,char* currentWord){
     char* theOperands;
     int expectedOperands;
 
-    expectedOperands = amountOfOperands(currentWord);
+    expectedOperands = amountOfOperands(theOperation);
     theOperands = strtok(NULL,"");
+
+    if(checkOperationLine(expectedOperands,firstOperand,secondOperand,lineNum,theOperands)){
+        if(expectedOperands == 0){
+            (*IC)++;
+            return 1;
+        }
+        return changeICByCommand(expectedOperands,IC,firstOperand,secondOperand,lineNum,theOperation);
+    }
+    return -1;
 
 }
 
-int checkOperationCommand(int numOfOperands,char* firstOperand,char* secondOperand,int lineNum,char* theOperands){
+int checkOperationLine(int numOfOperands,char* firstOperand,char* secondOperand,int lineNum,char* theOperands){
     int i;
     int j;
     if(numOfOperands == 0){
-        if(/**/){
+        if(theOperands == NULL){
             return 1;
-        }else{
-            printf("eror in line %d",lineNum);
-            return 0;
+        }
+        for(i = 0;i<strlen(theOperands);i++){
+            if(theOperands[i] != ' ' && theOperands[i] != '\n' && theOperands[i] != '\t'){
+                printf("cant be a operation with no operands that have more after the operation in line %d",lineNum);
+                return 0;
+            }
         }
     }
 
@@ -91,12 +103,11 @@ int checkOperationCommand(int numOfOperands,char* firstOperand,char* secondOpera
         removeRightWhiteSpaces(theOperands);
         for(i = 0;i<strlen(theOperands);i++){
             firstOperand[i] = theOperands[i];
-            if(theOperands[i] == ','){
-                printf("error need be only one operand in line %d",lineNum);
-                return 0;
-            }
-            return isOperand(firstOperand);
         }
+        if(operandError(firstOperand,lineNum)){
+                return 0;
+        }
+        
     }
 
     if(numOfOperands == 2){
@@ -108,7 +119,7 @@ int checkOperationCommand(int numOfOperands,char* firstOperand,char* secondOpera
             return 0;
         }
         removeRightWhiteSpaces(firstOperand);
-        if(operandError(firstOperand)){
+        if(operandError(firstOperand,lineNum)){
             return 0;
         }
         ++i;
@@ -120,14 +131,13 @@ int checkOperationCommand(int numOfOperands,char* firstOperand,char* secondOpera
         removeRightWhiteSpaces(secondOperand);
         removeLeftWhiteSpaces(secondOperand);
 
-        if(operandError(secondOperand)){
+        if(operandError(secondOperand,lineNum)){
             return 0;
         }
 
-        return 1;
-
-
     }
+
+    return 1;
 }
 
 int operandError(char* operand,int lineNum){
@@ -142,12 +152,16 @@ int operandError(char* operand,int lineNum){
             return 1;
         }
     }
-    if(strlen(operand) == 0){
+    if(strlen(operand) == 0 || endOfLine(operand)){
         printf("operand missing in line %d",lineNum);
         return 1;
     }
-    if(is_system_word(operand)){
-        printf("operand cant be reserved word line: %d",lineNum);
+    if(isOperation(operand)){
+        printf("operand cant be a operation line: %d",lineNum);
+        return 1;
+    }
+    if(isDirective(operand)){
+        printf("operand cant be a directive line: %d",lineNum);
         return 1;
     }
     if(operand[0] == ','){
@@ -156,4 +170,70 @@ int operandError(char* operand,int lineNum){
     }
 
     return 0;
+}
+
+int changeICByCommand(int numOfOperands,int* IC,char* firstOperand,char* secondOperand,int lineNum,char* theOperation){
+
+    int firstAddressingMethod = 0;
+    int secondAddressingMethod = 0;
+
+    if(numOfOperands == 1){
+        firstAddressingMethod = addressingMethodType(firstOperand,lineNum);
+
+        if(firstAddressingMethod == -1){
+            return -1;
+        }
+        
+        if(!isSourceAddressingMethod(theOperation,firstAddressingMethod)){
+            printf("not the right ddressing Method to the source Operand in line ",lineNum);
+            return -1;
+        }
+        addToIC(IC,firstAddressingMethod,0);
+    }
+
+    if(numOfOperands == 2){
+
+        firstAddressingMethod = addressingMethodType(firstOperand,lineNum);
+        secondAddressingMethod = addressingMethodType(firstOperand,lineNum);
+
+        if(firstAddressingMethod == -1 || secondAddressingMethod == -1){
+            return -1;
+        }
+
+        if(!isSourceAddressingMethod(theOperation,firstAddressingMethod)){
+            printf("not the right ddressing Method to the source Operand in line ",lineNum);
+            return -1;
+        }
+
+        addToIC(IC,firstAddressingMethod,0);
+
+        if(!isDestinationAddressingMethod(theOperation,secondAddressingMethod)){
+            printf("not the right ddressing Method to the destination Operand in line ",lineNum);
+            return -1;
+        }
+
+        addToIC(IC,secondAddressingMethod,firstAddressingMethod);
+
+    }
+
+    return 1;
+
+
+
+}
+
+void addToIC(int* IC,int currMethod,int prevMethod){
+    if(currMethod == REGISTER_ADDRESS && prevMethod != REGISTER_ADDRESS){
+        (*IC)++;
+    }
+    if(currMethod == IMMEDIATE_ADDRESS){
+        (*IC)++;
+    }
+    if(currMethod == STRUCT_ADDRESS){
+        (*IC) += 2;
+    }
+    if(currMethod == DIRECT_ADDRESS){
+        (*IC)++;
+    }
+
 }

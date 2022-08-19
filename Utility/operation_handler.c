@@ -43,3 +43,23 @@ int amountOfOperands(char* name){
     }
     return -1;
 }
+
+int isSourceAddressingMethod(char* operation,int addressingMethod){
+    int i;
+    for(i = 0;i<NUM_OF_OPERATIONS;i++){
+        if(strcmp(name,operationTable[i].name) == 0){
+            return operationTable[i].first_operand_valid[addressingMethod] == 1;
+        }
+    }
+    return -1;
+}
+
+int isDestinationAddressingMethod(char* operation,int addressingMethod){
+    int i;
+    for(i = 0;i<NUM_OF_OPERATIONS;i++){
+        if(strcmp(name,operationTable[i].name) == 0){
+            return operationTable[i].second_operand_valid[addressingMethod] == 1;
+        }
+    }
+    return -1;
+}
