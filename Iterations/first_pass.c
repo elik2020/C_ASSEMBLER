@@ -42,13 +42,15 @@ symbolTable first_pass(char* fileName,int* errorFound,int* entryFound){
                 *entryFound = 1;
             }
 
-            directiveHandler(&head,&DC,lineCount,currentWord,currentSymbol);
+            directiveHandler(&DC,lineCount,currentWord,currentSymbol);
         }else{
             if(isOperation(currentWord)){
                 IC++;
-                operationHandler(&IC,lineCount,currentWord);
+                if(operationHandler(&IC,lineCount,currentWord) == -1){
+                    (*entryFound) = 1;
+                }
             }else{
-                printf("bad in line %s",lineCount);
+                printf("invalid comend in line %d",lineCount);
             }
             
         }
@@ -88,15 +90,11 @@ int checkOperationLine(int numOfOperands,char* firstOperand,char* secondOperand,
     int i;
     int j;
     if(numOfOperands == 0){
-        if(theOperands == NULL){
-            return 1;
+        if(!isEmpty(theOperands)){
+            printf("cant be a operation with no operands that have more after the operation in line %d",lineNum);
+            return 0;
         }
-        for(i = 0;i<strlen(theOperands);i++){
-            if(theOperands[i] != ' ' && theOperands[i] != '\n' && theOperands[i] != '\t'){
-                printf("cant be a operation with no operands that have more after the operation in line %d",lineNum);
-                return 0;
-            }
-        }
+
     }
 
     if(numOfOperands == 1){
@@ -237,3 +235,33 @@ void addToIC(int* IC,int currMethod,int prevMethod){
     }
 
 }
+
+int directiveHandler(int *DC,int lineCount,char* theDirectiv,symbolTable* currentSymbol){
+    char* afterDirectiv;
+
+    afterDirectiv = strtok(NULL,"");
+
+    if(strcmp(theDirectiv,".data") == 0){
+        return dataHandler();
+    }
+
+    if(strcmp(theDirectiv,".string") == 0){
+        return stringHandler();
+    }
+
+    if(strcmp(theDirectiv,".struct") == 0){
+        return structHandler();
+    }
+
+    if(strcmp(theDirectiv,".extern") == 0){
+        return externHandler();
+    }
+
+    if(strcmp(theDirectiv,".entry") == 0){
+
+    }
+
+    printf("invalid directiv in line: %d",lineCount);
+    return -1;
+}
+

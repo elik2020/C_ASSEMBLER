@@ -122,3 +122,14 @@ int addressingMethodType(char* operand,int lineNum){
     printf("invalid addressing method in line",lineNum);
     return addressingError;
 }
+
+int isEmpty(char* word){
+    if(word == NULL){
+            return 1;
+    }
+    for(i = 0;i<strlen(word);i++){
+        if(word[i] != ' ' && word[i] != '\n' && word[i] != '\t'){
+            return 0;
+        }
+    }
+}

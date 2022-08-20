@@ -1,4 +1,4 @@
-
+#include "../Utility/operation_handler.h"
 
 static const struct operationTable{
 
@@ -34,10 +34,10 @@ int isOperation(char* name){
     return FALSE;
 }
 
-int amountOfOperands(char* name){
+int amountOfOperands(char* operation){
     int i;
     for(i = 0;i<NUM_OF_OPERATIONS;i++){
-        if(strcmp(name,operationTable[i].name) == 0){
+        if(strcmp(operation,operationTable[i].name) == 0){
             return operationTable[i].numOfOperands;
         }
     }
@@ -47,7 +47,7 @@ int amountOfOperands(char* name){
 int isSourceAddressingMethod(char* operation,int addressingMethod){
     int i;
     for(i = 0;i<NUM_OF_OPERATIONS;i++){
-        if(strcmp(name,operationTable[i].name) == 0){
+        if(strcmp(operation,operationTable[i].name) == 0){
             return operationTable[i].first_operand_valid[addressingMethod] == 1;
         }
     }
@@ -57,7 +57,7 @@ int isSourceAddressingMethod(char* operation,int addressingMethod){
 int isDestinationAddressingMethod(char* operation,int addressingMethod){
     int i;
     for(i = 0;i<NUM_OF_OPERATIONS;i++){
-        if(strcmp(name,operationTable[i].name) == 0){
+        if(strcmp(operation,operationTable[i].name) == 0){
             return operationTable[i].second_operand_valid[addressingMethod] == 1;
         }
     }
