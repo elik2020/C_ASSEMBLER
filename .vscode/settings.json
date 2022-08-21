@@ -6,6 +6,7 @@
         "stdio.h": "c",
         "all_definitions.h": "c",
         "first_pass.h": "c",
-        "symbol_table.h": "c"
+        "symbol_table.h": "c",
+        "operation_handler.h": "c"
     }
 }

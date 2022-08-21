@@ -28,10 +28,18 @@ symbolTable first_pass(char* fileName,int* errorFound,int* entryFound){
         currentWord = strtok(line, SPACES);
 
         if(checkLabel(currentWord)){
-            strcpy(labelName,currentWord);
-            currentSymbol = insertSymbolAtEnd(&head,currentWord,&IC);
-
-            currentWord = strtok(NULL,SPACES);
+            if(checkLabelName(currentWord)){
+                if(inSymbolTable(head,currentWord)){
+                    printf("label already exist label name: %s in line: %d",currentWord,lineCount);
+                    errorFound = 1;
+                }else{
+                    currentSymbol = insertSymbolAtEnd(&head,currentWord,&IC);
+                    currentWord = strtok(NULL,SPACES);
+                }
+            }else{
+                printf("wrong label name in line: %d the name of the label is: %s ",lineCount,currentWord);
+                *errorFound= 1;
+            }
             
         }
 
@@ -42,25 +50,29 @@ symbolTable first_pass(char* fileName,int* errorFound,int* entryFound){
                 *entryFound = 1;
             }
 
-            directiveHandler(&DC,lineCount,currentWord,currentSymbol);
+            if(directiveHandler(&head,&DC,lineCount,currentWord,currentSymbol) == -1){
+                *errorFound= 1;
+            }
         }else{
             if(isOperation(currentWord)){
                 IC++;
                 if(operationHandler(&IC,lineCount,currentWord) == -1){
-                    (*entryFound) = 1;
+                    *errorFound= 1;
                 }
             }else{
                 printf("invalid comend in line %d",lineCount);
+                *errorFound= 1;
             }
             
         }
-
-
 
         currentSymbol = NULL;
         memset(line,0,LINE_LEN);
 
     }
+
+    print_symbol_table(head);
+    free_symbol_table(head);
 
 }
 
@@ -99,6 +111,7 @@ int checkOperationLine(int numOfOperands,char* firstOperand,char* secondOperand,
 
     if(numOfOperands == 1){
         removeRightWhiteSpaces(theOperands);
+        removeLeftWhiteSpaces(secondOperand);
         for(i = 0;i<strlen(theOperands);i++){
             firstOperand[i] = theOperands[i];
         }
@@ -117,6 +130,7 @@ int checkOperationLine(int numOfOperands,char* firstOperand,char* secondOperand,
             return 0;
         }
         removeRightWhiteSpaces(firstOperand);
+        removeLeftWhiteSpaces(secondOperand);
         if(operandError(firstOperand,lineNum)){
             return 0;
         }
@@ -236,29 +250,28 @@ void addToIC(int* IC,int currMethod,int prevMethod){
 
 }
 
-int directiveHandler(int *DC,int lineCount,char* theDirectiv,symbolTable* currentSymbol){
+int directiveHandler(symbolTable** head,int *DC,int lineCount,char* theDirectiv,symbolTable* currentSymbol){
     char* afterDirectiv;
 
-    afterDirectiv = strtok(NULL,"");
 
     if(strcmp(theDirectiv,".data") == 0){
-        return dataHandler();
+        return dataHandler(DC,theDirectiv,currentSymbol,lineCount);
     }
 
     if(strcmp(theDirectiv,".string") == 0){
-        return stringHandler();
+        return stringHandler(DC,theDirectiv,currentSymbol,lineCount);
     }
 
     if(strcmp(theDirectiv,".struct") == 0){
-        return structHandler();
+        return structHandler(DC,theDirectiv,currentSymbol,lineCount);
     }
 
     if(strcmp(theDirectiv,".extern") == 0){
-        return externHandler();
+        return externHandler(head,DC,theDirectiv,currentSymbol,lineCount);
     }
 
     if(strcmp(theDirectiv,".entry") == 0){
-
+        return entryHandler(head,DC,theDirectiv,currentSymbol,lineCount);
     }
 
     printf("invalid directiv in line: %d",lineCount);

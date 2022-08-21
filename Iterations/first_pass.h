@@ -14,5 +14,6 @@ int checkOperationLine(int numOfOperands,char* firstOperand,char* secondOperand,
 int operandError(char* operand,int lineNum);
 int changeICByCommand(int numOfOperands,int* IC,char* firstOperand,char* secondOperand,int lineNum,char* theOperation);
 void addToIC(int* IC,int currMethod,int prevMethod);
+int directiveHandler(symbolTable** head,int *DC,int lineCount,char* theDirectiv,symbolTable* currentSymbol);
 
 #endif 

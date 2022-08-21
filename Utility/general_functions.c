@@ -5,13 +5,19 @@ int isRegister(char *name)
     return strlen(name) == REGISTER_NAME_LENGTH && name[0] == 'r' && name[1] >= '0' && name[1] <= '7';
 }
 
-int isNumber(char number[])
+int isNumber(char* number)
 {
     int i;
-    if (number[0] == '-' || number[0] == '+' || isdigit(number[0])) /*whether the first character is a digit or a sign*/
+    char* numCopy[LINE_LEN] = {0};
+
+    strcpy(numCopy,number);
+    removeLeftWhiteSpaces(numCopy);
+    removeRightWhiteSpaces(numCopy);
+
+    if (numCopy[0] == '-' || numCopy[0] == '+' || isdigit(numCopy[0])) /*whether the first character is a digit or a sign*/
     {
-        for (i = 1; i < strlen(number) - 1; i++)
-            if (!isdigit(number[i]))
+        for (i = 1; i < strlen(numCopy) - 1; i++)
+            if (!isdigit(numCopy[i]))
                 return FALSE;
     }
     else{
@@ -125,11 +131,12 @@ int addressingMethodType(char* operand,int lineNum){
 
 int isEmpty(char* word){
     if(word == NULL){
-            return 1;
+        return 1;
     }
     for(i = 0;i<strlen(word);i++){
         if(word[i] != ' ' && word[i] != '\n' && word[i] != '\t'){
             return 0;
         }
     }
+    return 1;
 }
