@@ -1,7 +1,7 @@
 #include "../Iterations/first_pass.h"
 
 
-symbolTable first_pass(char* fileName,int* errorFound,int* entryFound){
+symbolTable* first_pass(char* fileName,int* errorFound,int* entryFound){
 
     int IC = 100;
     int DC = 0;
@@ -10,8 +10,7 @@ symbolTable first_pass(char* fileName,int* errorFound,int* entryFound){
     symbolTable* currentSymbol = NULL;
     char line[LINE_LEN] = {0};
     char* currentWord = NULL;
-    char labelName[LABEL_LEN] = {0};
-    int checkError = 0;
+    /*char labelName[LABEL_LEN] = {0};*/
     int lineCount =  0;
     amFile = open_file(fileName,".am","r");
 
@@ -19,49 +18,61 @@ symbolTable first_pass(char* fileName,int* errorFound,int* entryFound){
 
         fgets(line, LINE_LEN, amFile); 
         lineCount++;
-
+        /*printf("line is: %s\n",line);*/
         if(ignoreLine(line)){
             continue;
         }
 
-        printf("line is: %s",line);
+        /*printf("line after is: %s\n\n",line);*/
         currentWord = strtok(line, SPACES);
 
+        if(isEmpty(currentWord)){
+            continue;
+        }
+
+        
+        
         if(checkLabel(currentWord)){
+            /*printf(" the word is: %s\n",currentWord);*/
             if(checkLabelName(currentWord)){
                 if(inSymbolTable(head,currentWord)){
-                    printf("label already exist label name: %s in line: %d",currentWord,lineCount);
-                    errorFound = 1;
+                    printf("label already exist label name: %s in line: %d\n",currentWord,lineCount);
+                    *errorFound = 1;
                 }else{
-                    currentSymbol = insertSymbolAtEnd(&head,currentWord,&IC);
+                    currentSymbol = insertSymbolAtEnd(&head,currentWord,IC);
                     currentWord = strtok(NULL,SPACES);
                 }
             }else{
-                printf("wrong label name in line: %d the name of the label is: %s ",lineCount,currentWord);
+                printf("wrong label name in line: %d the name of the label is: %s \n",lineCount,currentWord);
                 *errorFound= 1;
             }
             
         }
-
         
 
         if(isDirective(currentWord)){
             if(strcmp(currentWord,".entry") == 0){
                 *entryFound = 1;
             }
-
+            /*printf("the word is: %s\n\n",currentWord);*/
             if(directiveHandler(&head,&DC,lineCount,currentWord,currentSymbol) == -1){
                 *errorFound= 1;
             }
         }else{
+            
             if(isOperation(currentWord)){
+                /*printf("start IC is : %d in line: %d\n",IC,lineCount);*/
                 IC++;
+                if(currentSymbol != NULL){
+                    currentSymbol->symbolType = CODE_SYMBOL;
+                }
                 if(operationHandler(&IC,lineCount,currentWord) == -1){
                     *errorFound= 1;
                 }
+                /*printf("END IC is : %d in line: %d\n\n",IC,lineCount);*/
             }else{
-                printf("invalid comend in line %d",lineCount);
-                *errorFound= 1;
+                printf("invalid comend in line %d\n",lineCount);
+                
             }
             
         }
@@ -71,8 +82,17 @@ symbolTable first_pass(char* fileName,int* errorFound,int* entryFound){
 
     }
 
-    print_symbol_table(head);
-    free_symbol_table(head);
+    if(*errorFound == 1){
+        printf("IS ERROR\n");
+    }else{
+        AddICToData(&head,IC);
+    }
+
+    printf("finel IC: %d finle DC: %d\n",IC,DC);
+    
+    return head;
+
+
 
 }
 
@@ -86,12 +106,13 @@ int operationHandler(int* IC,int lineNum,char* theOperation){
 
     expectedOperands = amountOfOperands(theOperation);
     theOperands = strtok(NULL,"");
+    /*printf("the IC is : %d",*IC);*/
 
     if(checkOperationLine(expectedOperands,firstOperand,secondOperand,lineNum,theOperands)){
         if(expectedOperands == 0){
-            (*IC)++;
             return 1;
         }
+        /*printf("first operand is: %s second operand is: %s in line: %d\n",firstOperand,secondOperand,lineNum);*/
         return changeICByCommand(expectedOperands,IC,firstOperand,secondOperand,lineNum,theOperation);
     }
     return -1;
@@ -103,7 +124,7 @@ int checkOperationLine(int numOfOperands,char* firstOperand,char* secondOperand,
     int j;
     if(numOfOperands == 0){
         if(!isEmpty(theOperands)){
-            printf("cant be a operation with no operands that have more after the operation in line %d",lineNum);
+            printf("cant be a operation with no operands that have more after the operation in line %d\n",lineNum);
             return 0;
         }
 
@@ -116,7 +137,7 @@ int checkOperationLine(int numOfOperands,char* firstOperand,char* secondOperand,
             firstOperand[i] = theOperands[i];
         }
         if(operandError(firstOperand,lineNum)){
-                return 0;
+            return 0;
         }
         
     }
@@ -125,10 +146,11 @@ int checkOperationLine(int numOfOperands,char* firstOperand,char* secondOperand,
         for(i = 0;i<strlen(theOperands) && theOperands[i] != ',';i++){
             firstOperand[i] = theOperands[i];
         }
-        if(i = strlen(theOperands)-1){
-            printf("need be 2 operands in line %d",lineNum);
+        if(i == (strlen(theOperands)-1)){
+            printf("need be 2 operands in line %d\n",lineNum);
             return 0;
         }
+        
         removeRightWhiteSpaces(firstOperand);
         removeLeftWhiteSpaces(secondOperand);
         if(operandError(firstOperand,lineNum)){
@@ -140,9 +162,10 @@ int checkOperationLine(int numOfOperands,char* firstOperand,char* secondOperand,
             secondOperand[j] = theOperands[i];
             j++;
         }
+        /*printf("the operand is: %s int line : %d\n",secondOperand,lineNum);*/
         removeRightWhiteSpaces(secondOperand);
         removeLeftWhiteSpaces(secondOperand);
-
+        /*printf("the operand after is: %s int line : %d\n\n",secondOperand,lineNum);*/
         if(operandError(secondOperand,lineNum)){
             return 0;
         }
@@ -154,30 +177,31 @@ int checkOperationLine(int numOfOperands,char* firstOperand,char* secondOperand,
 
 int operandError(char* operand,int lineNum){
     int i;
+    /*printf("the operand is: %s int line : %d\n",operand,lineNum);*/
     for(i = 0;i<strlen(operand);i++){
         if(operand[i] == '\t' || operand[i] == ' '){
-            printf("spaces in operand line : %d",lineNum);
+            printf("spaces in operand line : %d\n",lineNum);
             return 1;
         }
         if(operand[i] == ','){
-            printf("to many operands in line : %d",lineNum);
+            printf("to many operands in line : %d\n",lineNum);
             return 1;
         }
     }
     if(strlen(operand) == 0 || endOfLine(operand)){
-        printf("operand missing in line %d",lineNum);
+        printf("operand missing in line %d\n",lineNum);
         return 1;
     }
     if(isOperation(operand)){
-        printf("operand cant be a operation line: %d",lineNum);
+        printf("operand cant be a operation line: %d\n",lineNum);
         return 1;
     }
     if(isDirective(operand)){
-        printf("operand cant be a directive line: %d",lineNum);
+        printf("operand cant be a directive line: %d\n",lineNum);
         return 1;
     }
     if(operand[0] == ','){
-        printf("to many commas in line : %d",lineNum);
+        printf("to many commas in line : %d\n",lineNum);
         return 1;
     }
 
@@ -196,35 +220,39 @@ int changeICByCommand(int numOfOperands,int* IC,char* firstOperand,char* secondO
             return -1;
         }
         
-        if(!isSourceAddressingMethod(theOperation,firstAddressingMethod)){
-            printf("not the right ddressing Method to the source Operand in line ",lineNum);
+        if(!isDestinationAddressingMethod(theOperation,firstAddressingMethod)){
+            printf("not the right adressing Method to the destination Operand in line: %d\n",lineNum);
             return -1;
         }
+        /*printf("the IC before is: %d the only adrresing mode is: %d in line: %d\n",*IC,firstAddressingMethod,lineNum);*/
         addToIC(IC,firstAddressingMethod,0);
+        /*printf("ONLY after IC is: %d in line: %d\n\n",*IC,lineNum);*/
     }
 
     if(numOfOperands == 2){
-
+        
         firstAddressingMethod = addressingMethodType(firstOperand,lineNum);
-        secondAddressingMethod = addressingMethodType(firstOperand,lineNum);
+        secondAddressingMethod = addressingMethodType(secondOperand,lineNum);
 
         if(firstAddressingMethod == -1 || secondAddressingMethod == -1){
             return -1;
         }
 
         if(!isSourceAddressingMethod(theOperation,firstAddressingMethod)){
-            printf("not the right ddressing Method to the source Operand in line ",lineNum);
+            printf("not the right ddressing Method to the source Operand in line: %d \n",lineNum);
             return -1;
         }
-
+        /*printf("the IC before is: %d the first adrresing mode is: %d in line: %d\n",*IC,firstAddressingMethod,lineNum);*/
         addToIC(IC,firstAddressingMethod,0);
+        /*printf("FIRST after IC is: %d in line: %d\n\n",*IC,lineNum);*/
 
         if(!isDestinationAddressingMethod(theOperation,secondAddressingMethod)){
-            printf("not the right ddressing Method to the destination Operand in line ",lineNum);
+            printf("not the right ddressing Method to the destination Operand in line: %d \n",lineNum);
             return -1;
         }
-
+        /*printf("the IC before is: %d the second adrresing mode is: %d in line: %d\n",*IC,secondAddressingMethod,lineNum);*/
         addToIC(IC,secondAddressingMethod,firstAddressingMethod);
+        /*printf("SECOND after IC is: %d in line: %d\n\n",*IC,lineNum);*/
 
     }
 
@@ -251,7 +279,6 @@ void addToIC(int* IC,int currMethod,int prevMethod){
 }
 
 int directiveHandler(symbolTable** head,int *DC,int lineCount,char* theDirectiv,symbolTable* currentSymbol){
-    char* afterDirectiv;
 
 
     if(strcmp(theDirectiv,".data") == 0){
@@ -274,7 +301,11 @@ int directiveHandler(symbolTable** head,int *DC,int lineCount,char* theDirectiv,
         return entryHandler(head,DC,theDirectiv,currentSymbol,lineCount);
     }
 
-    printf("invalid directiv in line: %d",lineCount);
+    printf("invalid directiv in line: %d\n",lineCount);
     return -1;
 }
+
+
+
+
 

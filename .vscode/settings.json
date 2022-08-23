@@ -7,6 +7,8 @@
         "all_definitions.h": "c",
         "first_pass.h": "c",
         "symbol_table.h": "c",
-        "operation_handler.h": "c"
+        "operation_handler.h": "c",
+        "general_functions.h": "c",
+        "directives_handler.h": "c"
     }
 }

@@ -15,7 +15,7 @@ int isDirective(char* word){
 
 int dataHandler(int* DC,char* theDirectiv,symbolTable* currentSymbol,int lineNum){
     char* afterComma = NULL;
-    char* afterDirectiv = NULL;
+    /*char* afterDirectiv = NULL;*/
     
 
     if(currentSymbol != NULL){
@@ -23,25 +23,25 @@ int dataHandler(int* DC,char* theDirectiv,symbolTable* currentSymbol,int lineNum
         currentSymbol->symbolType = DATA_SYMBOL;
     }
 
-    afterDirectiv = strtok(NULL,"");
+    /*afterDirectiv = strtok(NULL,"");*/
     afterComma =  strtok(NULL,",");
 
     if(afterComma == NULL){
-        printf("no numbers after .data in line: %d",lineNum);
+        printf("no numbers after .data in line: %d\n",lineNum);
         return -1;
     }
 
     while(afterComma != NULL){
 
         if(isEmpty(afterComma)){
-            printf("nothing after coma in line : %d",lineNum);
+            printf("nothing after coma in line : %d\n",lineNum);
             return -1;
         }
 
         if(isNumber(afterComma)){
             (*DC)++;
         }else{
-            printf("ronge number in line: %d",lineNum);
+            printf("ronge number in line: %d\n",lineNum);
         }
         afterComma =  strtok(NULL,",");
     }
@@ -63,26 +63,27 @@ int structHandler(int* DC,char* theDirectiv,symbolTable* currentSymbol,int lineN
         if(isNumber(theStruct)){
             (*DC)++;
         }else{
-            printf("wrong number in struct in lineL %d",lineNum);
+            printf("wrong number in struct in line %d\n",lineNum);
             return -1;
         }
+        
         return stringHandler(DC,theStruct,NULL,lineNum);
     }else{
-        printf("Nothing after .struct declaration in line: %d",lineNum);
+        printf("Nothing after .struct declaration in line: %d\n",lineNum);
         return -1;
     }
 }
 
 int stringHandler(int* DC,char* theDirectiv,symbolTable* currentSymbol,int lineNum){
-    int i;
+    int i = 0;
     int isString = 0;
     int stringLen = 0;
     char* theString;
-
+    
     theString = strtok(NULL,"");
-
+    
     if(isEmpty(theString) || strlen(theString) == 0){
-        printf("No string in line: %d",lineNum);
+        printf("No string in line: %d\n",lineNum);
         return -1;
     }
 
@@ -90,10 +91,16 @@ int stringHandler(int* DC,char* theDirectiv,symbolTable* currentSymbol,int lineN
         currentSymbol->address = (*DC);
         currentSymbol->symbolType = DATA_SYMBOL;
     }
-
+    
     removeRightWhiteSpaces(theString);
     removeLeftWhiteSpaces(theString);
 
+    /*for(i = 0;i<strlen(theString);i++){
+        if(theString[i] == '"'){
+            break;
+        }
+    }*/
+    
     
     if(theString[i] == '"'){
         while(!isString && theString[i] != '\0' &&  theString[i] != '\n'){
@@ -104,7 +111,7 @@ int stringHandler(int* DC,char* theDirectiv,symbolTable* currentSymbol,int lineN
             }
         }
     }else{
-        printf("wrong declaration of string in line: %d",lineNum);
+        printf("wrong declaration of string in line: %d\n",lineNum);
         return -1;
     }
     i++;
@@ -113,13 +120,13 @@ int stringHandler(int* DC,char* theDirectiv,symbolTable* currentSymbol,int lineN
             (*DC) = (*DC) + stringLen;
             return 1;
         }else{
-            printf("somthing after a string in line: %d",lineNum);
+            printf("somthing after a string in line: %d\n",lineNum);
             return -1;
         }
     }
 
-    printf("wrong string in line: %d",lineNum);
-
+    printf("wrong string in line: %d\n",lineNum);
+    return -1;
 
 }
 
@@ -134,21 +141,21 @@ int externHandler(symbolTable** head,int* DC,char* theDirectiv,symbolTable* curr
         deleteSymbol(head,currentSymbol->name);
     }
     if(isEmpty(labelAfterExtern)){
-        printf("No label after .extern declaration in line: %d",lineNum);
+        printf("No label after .extern declaration in line: %d\n",lineNum);
         return -1;
     }
 
     if(checkLabelName(labelAfterExtern)){
         if(head != NULL){
             if(inSymbolTable(*head,labelAfterExtern)){
-                printf("label already exist label name: %s in line: %d",labelAfterExtern,lineNum);
+                printf("label already exist label name: %s in line: %d\n",labelAfterExtern,lineNum);
                 return -1;
             }
         }
         externSymbol = insertSymbolAtEnd(head,labelAfterExtern,0);
         externSymbol->symbolType = EXTERNAL_SYMBOL;
     }else{
-        printf("wrong label name after .extern in line: %d",lineNum);
+        printf("wrong label name after .extern in line: %d\n",lineNum);
         return -1;
     }
 
@@ -156,7 +163,7 @@ int externHandler(symbolTable** head,int* DC,char* theDirectiv,symbolTable* curr
     if(afterLabel == NULL){
         return 1;
     }else{
-        printf("Found somthing after the label in the .extern declaration in line: %d",lineNum);
+        printf("Found somthing after the label in the .extern declaration in line: %d\n",lineNum);
         return -1;
     }
 
@@ -173,12 +180,12 @@ int entryHandler(symbolTable** head,int* DC,char* theDirectiv,symbolTable* curre
     }
 
     if(isEmpty(labelAfterEntry)){
-        printf("No label after .extern declaration in line: %d",lineNum);
+        printf("No label after .extern declaration in line: %d\n",lineNum);
         return -1;
     }
 
     if(!checkLabelName(labelAfterEntry)){
-        printf("wrong label name after .entry in line: %d",lineNum);
+        printf("wrong label name after .entry in line: %d\n",lineNum);
         return -1;
     }
 
@@ -186,7 +193,7 @@ int entryHandler(symbolTable** head,int* DC,char* theDirectiv,symbolTable* curre
     if(afterLabel == NULL){
         return 1;
     }else{
-        printf("Found somthing after the label in the .entry declaration in line: %d",lineNum);
+        printf("Found somthing after the label in the .entry declaration in line: %d\n",lineNum);
         return -1;
     }
 

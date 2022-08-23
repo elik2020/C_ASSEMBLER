@@ -1,4 +1,7 @@
 #include "../Utility/general_functions.h"
+#include "../Utility/operation_handler.h"
+#include "../Utility/directives_handler.h"
+#include "../Utility/symbol_table.h"
 
 int isRegister(char *name)
 {
@@ -8,7 +11,7 @@ int isRegister(char *name)
 int isNumber(char* number)
 {
     int i;
-    char* numCopy[LINE_LEN] = {0};
+    char numCopy[LINE_LEN] = {0};
 
     strcpy(numCopy,number);
     removeLeftWhiteSpaces(numCopy);
@@ -32,6 +35,9 @@ void removeLeftWhiteSpaces(char line[LINE_LEN]){
     for(i = 0;  (line[i] == ' ' || line[i] == '\t') && i < strlen(line) ; i++){
         j = i;
     }
+    if(line[0] == ' ' || line[0] == '\t'){
+        j++;
+    }
     /* shift to the left */
     for(i = 0; j <= strlen(line); i++){
         line[i] = line[j];
@@ -41,9 +47,9 @@ void removeLeftWhiteSpaces(char line[LINE_LEN]){
 }
 
 void removeRightWhiteSpaces(char line[LINE_LEN]){
-    int i;
-    for(i = strlen(line)-1 && (line[i] == ' ' || line[i] == '\t');i>0;i--){
-        line[i] = '\0'
+    int i = 0;
+    for(i = (strlen(line)-1);(line[i] == ' ' || line[i] == '\t' || line[i] == '\n') && i>0;i--){
+        line[i] = '\0';
     }
 }
 
@@ -71,9 +77,9 @@ void toNextWord(char *line)
 {
     int i = 0;
     if (line == NULL)
-        return NULL;
+        return;
     /* Skip rest of characters in the line (until a space) */
-    while (!isspace(line[i]) && !end_of_line(line)){
+    while (!isspace(line[i]) && !endOfLine(line)){
         line++;
         i++;
     }
@@ -88,7 +94,7 @@ int is_system_word(char* word){
 }
 
 void printError(char* error,int line,char* fileName){
-    printf("%s in line: %d in file: %s",error,line,fileName);
+    printf("%s in line: %d in file: %s\n",error,line,fileName);
 }
 
 int endOfLine(char *line)
@@ -97,13 +103,21 @@ int endOfLine(char *line)
 }
 
 int addressingMethodType(char* operand,int lineNum){
+    int i;
+    char number[LINE_LEN] = {0};
     char* afterDot;
     char* beforeDot;
+
     
     if (operand[0] == '#')
     {
-        if (isNumber(operand[1]))
+        for(i = 1;i<strlen(operand) && operand[i] != '\n';i++){
+            number[i-1] = operand[i];
+        }
+        if (isNumber(number)){
             return IMMEDIATE_ADDRESS;
+        }
+            
     }
 
     if (checkLabelName(operand))
@@ -111,12 +125,12 @@ int addressingMethodType(char* operand,int lineNum){
         return DIRECT_ADDRESS;
     }
 
-    if (is_register(operand))
+    if (isRegister(operand))
     {
         return REGISTER_ADDRESS;
     }
 
-    beforeDot = strtok(op, ".");
+    beforeDot = strtok(operand, ".");
     afterDot = strtok(NULL, ".");
     if (checkLabelName(beforeDot))
     {                                                       
@@ -125,11 +139,12 @@ int addressingMethodType(char* operand,int lineNum){
         }
             
     }
-    printf("invalid addressing method in line",lineNum);
+    printf("invalid addressing method in line: %d\n",lineNum);
     return addressingError;
 }
 
 int isEmpty(char* word){
+    int i;
     if(word == NULL){
         return 1;
     }

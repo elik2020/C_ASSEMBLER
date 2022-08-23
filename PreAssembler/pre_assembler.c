@@ -79,13 +79,13 @@ void add_to_macro_table(macro_table** head,char* macroName,FILE* asFile,int star
     int endIndex;
 
     line = get_line(asFile);
-    lineStart = strtok(line,SPACES);/*we get the first word in the line*/
+    lineStart = strtok(line,ONLY_SPACES);/*we get the first word in the line*/
 
     while(strcmp(lineStart,"endmacro\n") != 0){/*we check if we got to the end of the macro definition*/
         free(line);
         endIndex = ftell(asFile)-1;/*We save every time the end index so we have the index where the macro content ends*/
         line = get_line(asFile);
-        lineStart = strtok(line,SPACES);
+        lineStart = strtok(line,ONLY_SPACES);
     }
     free(line);
     newMacro = createMacro(macroName,startIndex,endIndex);/*we create a new macro node*/

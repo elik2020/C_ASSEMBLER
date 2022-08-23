@@ -7,7 +7,7 @@
 #include "../PreAssembler/macro_table.h"
 #include "../Utility/files.h"
 
-#define SPACES " \t\r\v\f"
+#define ONLY_SPACES " \t\r\v\f"
 #define SPACES_AND_NEWLINE " \t\r\v\f\n"
 
 int check_macro(char* line,FILE* asFile,macro_table** head,FILE* amFile);

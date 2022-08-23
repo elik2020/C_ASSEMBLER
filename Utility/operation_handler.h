@@ -1,7 +1,8 @@
 #ifndef OPERATION_HANDLER_H
 #define OPERATION_HANDLER_H
 
-#include "../Utility/all_definitions.h"
+
+#include "../Utility/general_functions.h"
 
 int isOperation(char* name);
 int amountOfOperands(char* name);

@@ -1,6 +1,7 @@
 
 #include "../Utility/symbol_table.h"
-
+#include "../Utility/general_functions.h"
+#include "../Iterations/first_pass.h"
 
 
 symbolTable* createSymbol(char* symbolName,int IC)
@@ -51,14 +52,13 @@ int checkLabel(char* word){
         return 1;
     }
     return 0;
-
     
 }
 
 int checkLabelName(char* name){
     int i = 0;
 
-    if(is_system_word(name) && isalpha(name[0]) && strlen(name) <= LABEL_LEN){
+    if(!is_system_word(name) && isalpha(name[0]) && strlen(name) <= LABEL_LEN){
         for(i = 0;i<strlen(name);i++){
             if(!isalpha(name[i]) && !isdigit(name[i])){
                 return 0;
@@ -102,7 +102,7 @@ void deleteSymbol(symbolTable** head, char* name)
 void print_symbol_table(symbolTable* head){
     while (head != NULL)
     {
-        printf("The label name: %s ; The address: %d ; The label type: %d",head->name,head->address,head->symbolType);
+        printf("The label name: %s ; The address: %d ; The label type: %d\n",head->name,head->address,head->symbolType);
         head = head->next;
     }
 }
@@ -115,6 +115,16 @@ void free_symbol_table(symbolTable* head){
        tmp = head;
        head = head->next;
        free(tmp);
+    }
+}
+
+void AddICToData(symbolTable** head,int IC){
+    symbolTable* temp = *head;
+    while(temp != NULL){
+        if(temp->symbolType == 2 || temp->symbolType == 4){
+            temp->address += IC;
+        }
+        temp = temp->next;
     }
 }
 
