@@ -5,6 +5,10 @@ int isDirective(char* word){
     int i = 0;
     const char *directives[] = {".data", ".string", ".struct", ".entry", ".extern"};
 
+    if(word == NULL){
+        return FALSE;
+    }
+
     for(i = 0;i<NUM_OF_DIRECTIVES;i++){
         if(strcmp(word,directives[i]) == 0){
             return TRUE;
@@ -52,7 +56,7 @@ int dataHandler(int* DC,char* theDirectiv,symbolTable* currentSymbol,int lineNum
 int structHandler(int* DC,char* theDirectiv,symbolTable* currentSymbol,int lineNum){
     char* theStruct;
 
-    theStruct = strtok(NULL,SPACES_AND_COMMA);
+    theStruct = strtok(NULL,",");
 
     if(currentSymbol != NULL){
         currentSymbol->address = (*DC);
@@ -66,7 +70,7 @@ int structHandler(int* DC,char* theDirectiv,symbolTable* currentSymbol,int lineN
             printf("wrong number in struct in line %d\n",lineNum);
             return -1;
         }
-        
+        /*printf("the num is: %s in line : %d",theStruct,lineNum);*/
         return stringHandler(DC,theStruct,NULL,lineNum);
     }else{
         printf("Nothing after .struct declaration in line: %d\n",lineNum);
@@ -81,7 +85,7 @@ int stringHandler(int* DC,char* theDirectiv,symbolTable* currentSymbol,int lineN
     char* theString;
     
     theString = strtok(NULL,"");
-    
+    /*printf("the string is: %s in line : %d\n",theString,lineNum);*/
     if(isEmpty(theString) || strlen(theString) == 0){
         printf("No string in line: %d\n",lineNum);
         return -1;

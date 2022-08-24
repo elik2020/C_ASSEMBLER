@@ -19,7 +19,7 @@ int isNumber(char* number)
 
     if (numCopy[0] == '-' || numCopy[0] == '+' || isdigit(numCopy[0])) /*whether the first character is a digit or a sign*/
     {
-        for (i = 1; i < strlen(numCopy) - 1; i++)
+        for (i = 1; i < strlen(numCopy); i++)
             if (!isdigit(numCopy[i]))
                 return FALSE;
     }
@@ -103,7 +103,8 @@ int endOfLine(char *line)
 }
 
 int addressingMethodType(char* operand,int lineNum){
-    int i;
+    int i = 0;
+    int j = 0;
     char number[LINE_LEN] = {0};
     char* afterDot;
     char* beforeDot;
@@ -112,8 +113,10 @@ int addressingMethodType(char* operand,int lineNum){
     if (operand[0] == '#')
     {
         for(i = 1;i<strlen(operand) && operand[i] != '\n';i++){
-            number[i-1] = operand[i];
+            number[j] = operand[i];
+            j++;
         }
+        
         if (isNumber(number)){
             return IMMEDIATE_ADDRESS;
         }

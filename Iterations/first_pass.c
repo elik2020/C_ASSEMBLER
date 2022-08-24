@@ -48,6 +48,7 @@ symbolTable* first_pass(char* fileName,int* errorFound,int* entryFound){
             }
             
         }
+
         
 
         if(isDirective(currentWord)){
@@ -132,10 +133,11 @@ int checkOperationLine(int numOfOperands,char* firstOperand,char* secondOperand,
 
     if(numOfOperands == 1){
         removeRightWhiteSpaces(theOperands);
-        removeLeftWhiteSpaces(secondOperand);
         for(i = 0;i<strlen(theOperands);i++){
             firstOperand[i] = theOperands[i];
         }
+        removeRightWhiteSpaces(firstOperand);
+        removeLeftWhiteSpaces(firstOperand);
         if(operandError(firstOperand,lineNum)){
             return 0;
         }
@@ -152,7 +154,7 @@ int checkOperationLine(int numOfOperands,char* firstOperand,char* secondOperand,
         }
         
         removeRightWhiteSpaces(firstOperand);
-        removeLeftWhiteSpaces(secondOperand);
+        removeLeftWhiteSpaces(firstOperand);
         if(operandError(firstOperand,lineNum)){
             return 0;
         }
@@ -233,13 +235,13 @@ int changeICByCommand(int numOfOperands,int* IC,char* firstOperand,char* secondO
         
         firstAddressingMethod = addressingMethodType(firstOperand,lineNum);
         secondAddressingMethod = addressingMethodType(secondOperand,lineNum);
-
+        
         if(firstAddressingMethod == -1 || secondAddressingMethod == -1){
             return -1;
         }
 
         if(!isSourceAddressingMethod(theOperation,firstAddressingMethod)){
-            printf("not the right ddressing Method to the source Operand in line: %d \n",lineNum);
+            printf("not the right adressing Method to the source Operand in line: %d \n",lineNum);
             return -1;
         }
         /*printf("the IC before is: %d the first adrresing mode is: %d in line: %d\n",*IC,firstAddressingMethod,lineNum);*/
@@ -247,7 +249,7 @@ int changeICByCommand(int numOfOperands,int* IC,char* firstOperand,char* secondO
         /*printf("FIRST after IC is: %d in line: %d\n\n",*IC,lineNum);*/
 
         if(!isDestinationAddressingMethod(theOperation,secondAddressingMethod)){
-            printf("not the right ddressing Method to the destination Operand in line: %d \n",lineNum);
+            printf("not the right adressing Method to the destination Operand in line: %d \n",lineNum);
             return -1;
         }
         /*printf("the IC before is: %d the second adrresing mode is: %d in line: %d\n",*IC,secondAddressingMethod,lineNum);*/

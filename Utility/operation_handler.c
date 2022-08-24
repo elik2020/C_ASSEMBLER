@@ -26,6 +26,9 @@ static const struct operationTable{
 
 int isOperation(char* name){
     int i;
+    if(name == NULL){
+        return FALSE;
+    }
     for(i = 0;i<NUM_OF_OPERATIONS;i++){
         if(strcmp(name,operationTable[i].name) == 0){
             return TRUE;
