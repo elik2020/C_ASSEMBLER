@@ -27,7 +27,7 @@ enum typeOfSymbol {CODE_SYMBOL=1,/* Contains an action like move */DATA_SYMBOL,/
 
 
 
-/*const char base32chars[] = "!@#$%^&*<>abcdefghijklmnopqrstuv";*/
+
 
 int isRegister(char *name);
 int isNumber(char* number);

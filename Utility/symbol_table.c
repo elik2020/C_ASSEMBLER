@@ -46,6 +46,27 @@ int inSymbolTable(symbolTable* head,char* symbolName){
     return 0;
 }
 
+symbolTable* is_extern(symbolTable* head,char* symbolName){
+    while(head){
+        if(strcmp(head->name,symbolName) == 0 && head->symbolType == EXTERNAL_SYMBOL){
+            return 1;
+        }
+        head = head->next;
+    }
+    return 0;
+}
+
+int symbol_address(symbolTable* head,char* symbolName){
+    while(head){
+        if(strcmp(head->name,symbolName) == 0 && head->symbolType == EXTERNAL_SYMBOL){
+            return head->address;
+        }
+        head = head->next;
+    }
+    return 0;
+}
+
+
 int checkLabel(char* word){
     if(word[strlen(word)-1] == ':'){
         word[strlen(word)-1] = '\0';
@@ -126,6 +147,17 @@ void AddICToData(symbolTable** head,int IC){
         }
         temp = temp->next;
     }
+}
+
+int table_contain_extern(symbolTable* head){
+    while (head != NULL)
+    {
+        if(head->symbolType == EXTERNAL_SYMBOL){
+            return 1;
+        }
+       head = head->next;
+    }
+    return 0;
 }
 
 

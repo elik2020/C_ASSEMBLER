@@ -26,5 +26,6 @@ void deleteSymbol(symbolTable** head, char* name);
 void print_symbol_table(symbolTable* head);
 void free_symbol_table(symbolTable* head);
 void AddICToData(symbolTable** head,int IC);
+int table_contain_extern(symbolTable* head);
 
 #endif 
