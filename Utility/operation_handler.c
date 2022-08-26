@@ -66,3 +66,13 @@ int isDestinationAddressingMethod(char* operation,int addressingMethod){
     }
     return -1;
 }
+
+int getOpCode(char* operation){
+    int i;
+    for(i = 0;i<NUM_OF_OPERATIONS;i++){
+        if(strcmp(operation,operationTable[i].name) == 0){
+            return operationTable[i].opcode;
+        }
+    }
+    return -1;
+}

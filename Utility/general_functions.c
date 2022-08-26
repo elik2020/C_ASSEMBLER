@@ -116,7 +116,7 @@ int addressingMethodType(char* operand,int lineNum){
             number[j] = operand[i];
             j++;
         }
-        
+
         if (isNumber(number)){
             return IMMEDIATE_ADDRESS;
         }
@@ -157,4 +157,13 @@ int isEmpty(char* word){
         }
     }
     return 1;
+}
+
+int registerNum(char* register){
+    return register[1];
+}
+
+void stringToNumber(int* num,char* numString){
+    char* tmp;
+    *num = strtol(numString,&temp,10);
 }
