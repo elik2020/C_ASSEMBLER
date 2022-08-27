@@ -1,5 +1,5 @@
-assembler: main.o pre_assembler.o macro_table.o files.o first_pass.o general_functions.o operation_handler.o symbol_table.o directives_handler.o
-		gcc -ansi -Wall -pedantic main.o pre_assembler.o macro_table.o files.o first_pass.o general_functions.o operation_handler.o symbol_table.o directives_handler.o -o assembler
+assembler: main.o pre_assembler.o macro_table.o files.o first_pass.o general_functions.o operation_handler.o symbol_table.o directives_handler.o second_pass.o
+		gcc -ansi -Wall -pedantic main.o pre_assembler.o macro_table.o files.o first_pass.o general_functions.o operation_handler.o symbol_table.o directives_handler.o second_pass.o -o assembler
 
 pre_assembler.o: PreAssembler/pre_assembler.c PreAssembler/pre_assembler.h
 		gcc -c -ansi -Wall -pedantic PreAssembler/pre_assembler.c -o pre_assembler.o
@@ -24,6 +24,9 @@ symbol_table.o: Utility/symbol_table.c Utility/symbol_table.h
 
 directives_handler.o: Utility/directives_handler.c Utility/directives_handler.h 
 		gcc -c -ansi -Wall -pedantic Utility/directives_handler.c -o directives_handler.o
+
+second_pass.o: Iterations/second_pass.c Iterations/second_pass.h
+		gcc -c -ansi -Wall -pedantic Iterations/second_pass.c -o second_pass.o
 
 main.o: main.c main.h
 		gcc -c -ansi -Wall -pedantic main.c -o main.o

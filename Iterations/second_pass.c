@@ -1,23 +1,31 @@
 #include "../Iterations/second_pass.h"
+#include "../Utility/files.h"
+#include "../Utility/symbol_table.h"
+#include "../Utility/operation_handler.h"
+#include "../Utility/general_functions.h"
+#include "../Utility/directives_handler.h"
+#include "../Iterations/first_pass.h"
 
-void second_pass(char* fileNmae,int isEntry,int endIC,int endDC,symbolTable* head){
+void second_pass(char* fileName,int isEntry,int endIC,int endDC,symbolTable* head){
 
     int lineNum = 0;
     int isError = 0;
     char line[LINE_LEN] = {0};
     char* currentWord = NULL;
     int IC = 99;
-    FILE* obFile = NULL,*entFile = NULL,*extFile = NULL,*operationFile = NULL,*dataFile = NULL,*amFile = NULL;
+    FILE* entFile = NULL,*extFile = NULL,*operationFile = NULL,*dataFile = NULL,*amFile = NULL;
 
     if(table_contain_extern(head)){
-        extFile = open_file(fileNmae,".ext","w");
+        extFile = open_file(fileName,".ext","w");
     }
     if(isEntry){
-        entFile = open_file(fileNmae,".ent","w");
+        entFile = open_file(fileName,".ent","w");
     }
-    amFile = open_file(fileNmae,".am","r");
-    operationFile = open_file(fileNmae,".oper","w+");
-    dataFile = open_file(fileNmae,".data","w+");
+    amFile = open_file(fileName,".am","r");
+    operationFile = open_file(fileName,".oper","w+");
+    dataFile = open_file(fileName,".data","w+");
+
+    addFinalICAndDC(endIC,endDC,operationFile);
 
     while(!feof(amFile)){
         fgets(line, LINE_LEN, amFile); 
@@ -59,12 +67,96 @@ void second_pass(char* fileNmae,int isEntry,int endIC,int endDC,symbolTable* hea
     }
 
     if(isError == 1){
-        close_second_pass();
+        close_second_pass(fileName,entFile,extFile,operationFile,dataFile,amFile);
+    }else{
+        finish_second_pass(fileName,entFile,extFile,operationFile,dataFile,amFile);
     }
-    
+
     free_symbol_table(head);
 
 
+}
+
+void addFinalICAndDC(int endIC, int endDC,FILE* operationFile){
+    char ICToBase32[3] = {0};
+    char DCToBase32[3] = {0};
+
+    convert_to_base32(endIC-100,ICToBase32);
+    convert_to_base32(endDC,DCToBase32);
+
+    if(endDC< 32){
+        DCToBase32[0] = DCToBase32[1];
+        DCToBase32[1] = '\0';
+    }
+
+    if(endIC-100 < 32){
+        ICToBase32[0] = ICToBase32[1];
+        ICToBase32[1] = '\0';
+    }
+
+    fprintf(operationFile, "%s\t%s\n\n", ICToBase32,DCToBase32);
+
+}
+
+void finish_second_pass(char *fileName,FILE* entFile,FILE* extFile,FILE* operationFile,FILE* dataFile,FILE* amFile){
+    FILE* obFile = NULL;
+    char ch;
+    obFile = open_file(fileName,".ob","w");
+
+    fseek(operationFile, 0, SEEK_SET);
+    fseek(dataFile, 0, SEEK_SET);
+
+    while((ch = fgetc(operationFile)) != EOF){
+        fputc(ch,obFile);
+    }
+
+ 
+    while((ch = fgetc(dataFile)) != EOF){
+        fputc(ch,obFile);
+    }
+
+    fclose(obFile);
+    fclose(operationFile);
+    fclose(dataFile);
+    fclose(amFile);
+    deletingFile(fileName,".oper");
+    deletingFile(fileName,".data");
+    if(entFile != NULL){
+        fclose(entFile);
+    }
+    if(extFile != NULL){
+        fclose(extFile);
+    }
+
+}
+
+void close_second_pass(char *fileName,FILE* entFile,FILE* extFile,FILE* operationFile,FILE* dataFile,FILE* amFile){
+    fclose(operationFile);
+    fclose(dataFile);
+    fclose(amFile);
+    if(entFile != NULL){
+        fclose(entFile);
+        deletingFile(fileName,".ent");
+    }
+    if(extFile != NULL){
+        fclose(extFile);
+        deletingFile(fileName,".ext");
+    }
+    deletingFile(fileName,".am");
+    deletingFile(fileName,".oper");
+    deletingFile(fileName,".data");
+
+}
+
+void deletingFile(char *fileName,char* fileExtension){
+    char* tempName = (char*)malloc(sizeof(fileName) + sizeof(fileExtension)+1);
+
+    strcpy(tempName,fileName);
+    strcat(tempName,fileExtension);
+
+    remov(tempName);
+
+    free(tempName);
 }
 
 int directiveEncoder(symbolTable* head,int* IC,int lineNum,char* theDirectiv,FILE* entFile,FILE* dataFile){
@@ -340,7 +432,7 @@ int encodeDirectAddress(symbolTable* head,int* IC,char* theOperand,int lineNum,F
     int ARE = 0;
 
     if(inSymbolTable(head,theOperand)){
-        if(is_extern(theOperand)){
+        if(is_extern(head,theOperand)){
             ARE = 1;
             (*IC)++;
             encoded_to_file(operationFile,theOperand,(*IC));
@@ -385,22 +477,50 @@ int encodeImmediateAddress(int* IC,char* theOperand,int lineNum,FILE* operationF
 }
 
 int encodeStructAddress(symbolTable* head,int* IC,char* theOperand,int lineNum,FILE* operationFile,FILE* extFile){
-    char numBase32[3] = {0};
+    char toBase32[3] = {0};
     char* afterDot;
     char* beforeDot;
 
     int numInStruct = 0;
+    int ARE = 0;
 
     beforeDot = strtok(theOperand, ".");
     afterDot = strtok(NULL, ".");
 
-    if(encodeDirectAddress(head,IC,theOperand,lineNum,operationFile,extFile) == -1){
+    
+
+    if(inSymbolTable(head,beforeDot)){
+        if(is_extern(head,beforeDot)){
+            ARE = 1;
+            (*IC)++;
+            encoded_to_file(operationFile,theOperand,(*IC));
+            convert_to_base32(symbol_address(head,theOperand) << 8 | ARE,toBase32);
+            encoded_to_file(operationFile,toBase32,(*IC));
+            
+
+        }else{
+            if(is_struct(head,beforeDot)){
+                ARE = 2;
+                (*IC)++;
+                convert_to_base32(symbol_address(head,theOperand) << 8 | ARE,toBase32);
+                encoded_to_file(operationFile,toBase32,(*IC));
+                
+            }else{
+                printf("Not using a struct symbol in line: %d",lineNum);
+                return -1;
+            }
+            
+        }
+
+    }else{
+        printf("Non existing symbol in line: %d",lineNum);
         return -1;
-    } 
+    }
+    
     (*IC)++;
     stringToNumber(&numInStruct,afterDot);
-    convert_to_base32(numInStruct << 2,numBase32);
-    encoded_to_file(operationFile,numBase32,(*IC));
+    convert_to_base32(numInStruct << 2,toBase32);
+    encoded_to_file(operationFile,toBase32,(*IC));
 
     return 1;
 

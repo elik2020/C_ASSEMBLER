@@ -20,6 +20,9 @@ typedef struct symbolTable{
 symbolTable* createSymbol(char* symbolName,int IC);
 symbolTable* insertSymbolAtEnd(symbolTable** head,char* symbolName,int IC);
 int inSymbolTable(symbolTable* head,char* symbolName);
+symbolTable* is_extern(symbolTable* head,char* symbolName);
+symbolTable* is_struct(symbolTable* head,char* symbolName);
+int symbol_address(symbolTable* head,char* symbolName);
 int checkLabel(char* word);
 int checkLabelName(char* name);
 void deleteSymbol(symbolTable** head, char* name);

@@ -1,10 +1,8 @@
 #include "../Iterations/first_pass.h"
 
 
-symbolTable* first_pass(char* fileName,int* errorFound,int* entryFound){
+symbolTable* first_pass(char* fileName,int* errorFound,int* entryFound,int* IC,int* DC){
 
-    int IC = 100;
-    int DC = 0;
     FILE* amFile = NULL;
     symbolTable* head = NULL;
     symbolTable* currentSymbol = NULL;
@@ -39,7 +37,7 @@ symbolTable* first_pass(char* fileName,int* errorFound,int* entryFound){
                     printf("label already exist label name: %s in line: %d\n",currentWord,lineCount);
                     *errorFound = 1;
                 }else{
-                    currentSymbol = insertSymbolAtEnd(&head,currentWord,IC);
+                    currentSymbol = insertSymbolAtEnd(&head,currentWord,*IC);
                     currentWord = strtok(NULL,SPACES);
                 }
             }else{
@@ -56,21 +54,21 @@ symbolTable* first_pass(char* fileName,int* errorFound,int* entryFound){
                 *entryFound = 1;
             }
             /*printf("the word is: %s\n\n",currentWord);*/
-            if(directiveHandler(&head,&DC,lineCount,currentWord,currentSymbol) == -1){
+            if(directiveHandler(&head,DC,lineCount,currentWord,currentSymbol) == -1){
                 *errorFound= 1;
             }
         }else{
             
             if(isOperation(currentWord)){
-                /*printf("start IC is : %d in line: %d\n",IC,lineCount);*/
-                IC++;
+                /*printf("start IC is : %d in line: %d\n",*IC,lineCount);*/
+                *(IC)++;
                 if(currentSymbol != NULL){
                     currentSymbol->symbolType = CODE_SYMBOL;
                 }
-                if(operationHandler(&IC,lineCount,currentWord) == -1){
+                if(operationHandler(IC,lineCount,currentWord) == -1){
                     *errorFound= 1;
                 }
-                /*printf("END IC is : %d in line: %d\n\n",IC,lineCount);*/
+                /*printf("END IC is : %d in line: %d\n\n",*IC,lineCount);*/
             }else{
                 printf("invalid comend in line %d\n",lineCount);
                 
@@ -86,10 +84,10 @@ symbolTable* first_pass(char* fileName,int* errorFound,int* entryFound){
     if(*errorFound == 1){
         printf("IS ERROR\n");
     }else{
-        AddICToData(&head,IC);
+        AddICToData(&head,*IC);
     }
 
-    printf("finel IC: %d finle DC: %d\n",IC,DC);
+    printf("finel IC: %d finle DC: %d\n",*IC,*DC);
     
     return head;
 

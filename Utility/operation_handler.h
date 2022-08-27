@@ -8,6 +8,6 @@ int isOperation(char* name);
 int amountOfOperands(char* name);
 int isSourceAddressingMethod(char* operation,int addressingMethod);
 int isDestinationAddressingMethod(char* operation,int addressingMethod);
-
+int getOpCode(char* operation);
 
 #endif

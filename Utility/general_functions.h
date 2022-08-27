@@ -41,5 +41,7 @@ int is_system_word(char* word);
 int endOfLine(char *line);
 int addressingMethodType(char* operand,int lineNum);
 int isEmpty(char* word);
+int registerNum(char* register);
+void stringToNumber(int* num,char* numString);
 
 #endif 
