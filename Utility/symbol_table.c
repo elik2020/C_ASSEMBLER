@@ -46,7 +46,7 @@ int inSymbolTable(symbolTable* head,char* symbolName){
     return 0;
 }
 
-symbolTable* is_extern(symbolTable* head,char* symbolName){
+int is_extern(symbolTable* head,char* symbolName){
     while(head){
         if(strcmp(head->name,symbolName) == 0 && head->symbolType == EXTERNAL_SYMBOL){
             return 1;
@@ -56,7 +56,7 @@ symbolTable* is_extern(symbolTable* head,char* symbolName){
     return 0;
 }
 
-symbolTable* is_struct(symbolTable* head,char* symbolName){
+int is_struct(symbolTable* head,char* symbolName){
     while(head){
         if(strcmp(head->name,symbolName) == 0 && head->symbolType == STRUCT_SYMBOL){
             return 1;
@@ -69,7 +69,7 @@ symbolTable* is_struct(symbolTable* head,char* symbolName){
 
 int symbol_address(symbolTable* head,char* symbolName){
     while(head){
-        if(strcmp(head->name,symbolName) == 0 && head->symbolType == EXTERNAL_SYMBOL){
+        if(strcmp(head->name,symbolName) == 0){
             return head->address;
         }
         head = head->next;

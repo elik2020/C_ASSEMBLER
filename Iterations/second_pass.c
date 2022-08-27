@@ -26,6 +26,7 @@ void second_pass(char* fileName,int isEntry,int endIC,int endDC,symbolTable* hea
     dataFile = open_file(fileName,".data","w+");
 
     addFinalICAndDC(endIC,endDC,operationFile);
+    
 
     while(!feof(amFile)){
         fgets(line, LINE_LEN, amFile); 
@@ -41,11 +42,11 @@ void second_pass(char* fileName,int isEntry,int endIC,int endDC,symbolTable* hea
         if(isEmpty(currentWord)){
             continue;
         }
-
+        
         if(checkLabel(currentWord)){
-            currentWord = strtok(line, SPACES);
+            currentWord = strtok(NULL, SPACES);
         }
-
+        
         if(isDirective(currentWord)){
             /*printf("the word is: %s\n\n",currentWord);*/
             if(directiveEncoder(head,&IC,lineNum,currentWord,entFile,dataFile) == -1){
@@ -55,19 +56,19 @@ void second_pass(char* fileName,int isEntry,int endIC,int endDC,symbolTable* hea
         }else{
             
             if(isOperation(currentWord)){
-                /*printf("start IC is : %d in line: %d\n",IC,lineCount);*/
+                /*printf("the word is: %s in line: %d\n\n",currentWord,lineNum);*/
                 if(getOperands(head,&IC,operationFile,lineNum,extFile,currentWord) == -1){
                     isError = 1;
                 }
                 
-                /*printf("END IC is : %d in line: %d\n\n",IC,lineCount);*/
             }
             
         }
     }
 
     if(isError == 1){
-        close_second_pass(fileName,entFile,extFile,operationFile,dataFile,amFile);
+        /*close_second_pass(fileName,entFile,extFile,operationFile,dataFile,amFile);*/
+        printf("error detact\n\n");
     }else{
         finish_second_pass(fileName,entFile,extFile,operationFile,dataFile,amFile);
     }
@@ -80,9 +81,10 @@ void second_pass(char* fileName,int isEntry,int endIC,int endDC,symbolTable* hea
 void addFinalICAndDC(int endIC, int endDC,FILE* operationFile){
     char ICToBase32[3] = {0};
     char DCToBase32[3] = {0};
-
-    convert_to_base32(endIC-100,ICToBase32);
+    
+    convert_to_base32((endIC-100),ICToBase32);
     convert_to_base32(endDC,DCToBase32);
+    
 
     if(endDC< 32){
         DCToBase32[0] = DCToBase32[1];
@@ -154,7 +156,7 @@ void deletingFile(char *fileName,char* fileExtension){
     strcpy(tempName,fileName);
     strcat(tempName,fileExtension);
 
-    remov(tempName);
+    remove(tempName);
 
     free(tempName);
 }
@@ -181,8 +183,7 @@ int directiveEncoder(symbolTable* head,int* IC,int lineNum,char* theDirectiv,FIL
         return entryCheck(head,lineNum,entFile);
     }
 
-    printf("invalid directiv in line: %d\n",lineNum);
-    return -1;
+    return 1;
 }
 
 int externCheck(symbolTable* head,int lineNum){
@@ -267,7 +268,7 @@ void stringEncoder(int* IC,FILE* dataFile,int lineNum){
 
 void structEncoder(int* IC,FILE* dataFile,int lineNum){
     char* theStruct;
-    char* numBase32[3] = {0};
+    char numBase32[3] = {0};
     int num = 0;
     theStruct = strtok(NULL,",");
 
@@ -290,7 +291,7 @@ void convert_to_base32(unsigned int num,char* keepBase32){
 
     leftSide = num&(mask << 5);
     leftSide>>=5;
-    rightSide = num << mask;
+    rightSide = num & mask;
 
     keepBase32[0] = base32[leftSide];
     keepBase32[1] = base32[rightSide];
@@ -313,6 +314,10 @@ int getOperands(symbolTable* head,int* IC,FILE* operationFile,int lineNum,FILE* 
 
     numOfOperands = amountOfOperands(theOperation);
     theOperands = strtok(NULL,"");
+
+    if(numOfOperands == 0){
+        return encodeOperation(head,IC,numOfOperands,firstOperand,secondOperand,lineNum,operationFile,extFile,theOperation);
+    }
 
     if(numOfOperands == 1){
         removeRightWhiteSpaces(theOperands);
@@ -339,21 +344,25 @@ int getOperands(symbolTable* head,int* IC,FILE* operationFile,int lineNum,FILE* 
             secondOperand[j] = theOperands[i];
             j++;
         }
-        /*printf("the operand is: %s int line : %d\n",secondOperand,lineNum);*/
+        /*printf("the operand is: %s int line : %d\n",firstOperand,lineNum);*/
         removeRightWhiteSpaces(secondOperand);
         removeLeftWhiteSpaces(secondOperand);
         /*printf("the operand after is: %s int line : %d\n\n",secondOperand,lineNum);*/
         return encodeOperation(head,IC,numOfOperands,firstOperand,secondOperand,lineNum,operationFile,extFile,theOperation);
     }
+    return -1;
 }
 
 int encodeOperation(symbolTable* head,int* IC,int numOfOperands,char* firstOperand,char* secondOperand,int lineNum,FILE* operationFile,FILE* extFile,char* theOperation){
     char toBase32[3] = {0};
+    char firstOperandCopy[LINE_LEN] = {0};
+    char secondOperandCopy[LINE_LEN] = {0};
 
-    int firstAddressingMethod = 0,secondAddressingMethod = 0,opCode = 0;
-    unsigned int combinedRegister = 0;
+    int firstAddressingMethod = 0,secondAddressingMethod = 0,opCode = 0,registerNum1 = 0,registerNum2 = 0;
+    
 
     opCode = getOpCode(theOperation);
+    /*printf("opcode is: %d\n",opCode);*/
 
     if(numOfOperands == 0){
         (*IC)++;
@@ -363,8 +372,9 @@ int encodeOperation(symbolTable* head,int* IC,int numOfOperands,char* firstOpera
     }
 
     if(numOfOperands == 1){
+        strcpy(firstOperandCopy,firstOperand);
         (*IC)++;
-        firstAddressingMethod = addressingMethodType(firstOperand,lineNum);
+        firstAddressingMethod = addressingMethodType(firstOperandCopy,lineNum);
         convert_to_base32(opCode << 6 | firstAddressingMethod << 2,toBase32);
         encoded_to_file(operationFile,toBase32,(*IC));
 
@@ -373,17 +383,23 @@ int encodeOperation(symbolTable* head,int* IC,int numOfOperands,char* firstOpera
     }
 
     if(numOfOperands == 2){
-        firstAddressingMethod = addressingMethodType(firstOperand,lineNum);
-        secondAddressingMethod = addressingMethodType(secondOperand,lineNum);
+        strcpy(firstOperandCopy,firstOperand);
+        strcpy(secondOperandCopy,secondOperand);
+        
+        firstAddressingMethod = addressingMethodType(firstOperandCopy,lineNum);
+        secondAddressingMethod = addressingMethodType(secondOperandCopy,lineNum);
+        
         (*IC)++;
+        /*printf("firstAdress: %d second Adress: %d\n",firstAddressingMethod,secondAddressingMethod);*/
 
         convert_to_base32(opCode << 6 | firstAddressingMethod << 4 | secondAddressingMethod << 2,toBase32);
         encoded_to_file(operationFile,toBase32,(*IC));
 
         if(firstAddressingMethod == REGISTER_ADDRESS && secondAddressingMethod == REGISTER_ADDRESS){
             (*IC)++;
-            combinedRegister = registerNum(firstOperand) << 6 | registerNum(secondOperand) << 2;
-            convert_to_base32(combinedRegister,toBase32);
+            registerNum1 = firstOperand[1] - '0';
+            registerNum2 = secondOperand[1] - '0';
+            convert_to_base32( registerNum1 << 6 | registerNum2 << 2,toBase32);
             encoded_to_file(operationFile,toBase32,(*IC));
             return 1;
         }
@@ -398,10 +414,14 @@ int encodeOperation(symbolTable* head,int* IC,int numOfOperands,char* firstOpera
 
         return 1;
     }
+
+    return -1;
 }
 
-int encodeAddressingMethod(symbolTable* head,int* IC,char* addressingMethod,char* theOperand,int destinationAddressing,int lineNum,FILE* operationFile,FILE* extFile){
+int encodeAddressingMethod(symbolTable* head,int* IC,int addressingMethod,char* theOperand,int destinationAddressing,int lineNum,FILE* operationFile,FILE* extFile){
     char registerNumBase32[3] = {0};
+    int registerNum = 0;
+
     if(addressingMethod == DIRECT_ADDRESS){
         return encodeDirectAddress(head,IC,theOperand,lineNum,operationFile,extFile);
     }
@@ -416,14 +436,18 @@ int encodeAddressingMethod(symbolTable* head,int* IC,char* addressingMethod,char
     if(addressingMethod == REGISTER_ADDRESS){
         (*IC)++;
         if(destinationAddressing){
-            convert_to_base32(theOperand[1] << 2,registerNumBase32);
+            registerNum = theOperand[1] - '0';
+            convert_to_base32(registerNum << 2,registerNumBase32);
             encoded_to_file(operationFile,registerNumBase32,(*IC));
         }else{
-            convert_to_base32(theOperand[1] << 6,registerNumBase32);
+            registerNum = theOperand[1] - '0';
+            convert_to_base32(registerNum << 6,registerNumBase32);
             encoded_to_file(operationFile,registerNumBase32,(*IC));
         }
         return 0;
     }
+
+    return -1;
     
 }
 
@@ -435,15 +459,16 @@ int encodeDirectAddress(symbolTable* head,int* IC,char* theOperand,int lineNum,F
         if(is_extern(head,theOperand)){
             ARE = 1;
             (*IC)++;
-            encoded_to_file(operationFile,theOperand,(*IC));
-            convert_to_base32(symbol_address(head,theOperand) << 8 | ARE,toBase32);
+            convert_to_base32((*IC),toBase32);
+            fprintf(extFile, "%s\t%s\n", theOperand,toBase32);
+            convert_to_base32(symbol_address(head,theOperand) << 2 | ARE,toBase32);
             encoded_to_file(operationFile,toBase32,(*IC));
             return 1;
 
         }else{
             ARE = 2;
             (*IC)++;
-            convert_to_base32(symbol_address(head,theOperand) << 8 | ARE,toBase32);
+            convert_to_base32(symbol_address(head,theOperand) << 2 | ARE,toBase32);
             encoded_to_file(operationFile,toBase32,(*IC));
             return 1;
         }
@@ -493,8 +518,9 @@ int encodeStructAddress(symbolTable* head,int* IC,char* theOperand,int lineNum,F
         if(is_extern(head,beforeDot)){
             ARE = 1;
             (*IC)++;
-            encoded_to_file(operationFile,theOperand,(*IC));
-            convert_to_base32(symbol_address(head,theOperand) << 8 | ARE,toBase32);
+            convert_to_base32((*IC),toBase32);
+            fprintf(extFile, "%s\t%s\n", theOperand,toBase32);
+            convert_to_base32(symbol_address(head,theOperand) << 2| ARE,toBase32);
             encoded_to_file(operationFile,toBase32,(*IC));
             
 
@@ -502,7 +528,7 @@ int encodeStructAddress(symbolTable* head,int* IC,char* theOperand,int lineNum,F
             if(is_struct(head,beforeDot)){
                 ARE = 2;
                 (*IC)++;
-                convert_to_base32(symbol_address(head,theOperand) << 8 | ARE,toBase32);
+                convert_to_base32(symbol_address(head,theOperand) << 2 | ARE,toBase32);
                 encoded_to_file(operationFile,toBase32,(*IC));
                 
             }else{

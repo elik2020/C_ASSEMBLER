@@ -24,11 +24,6 @@ enum addressingMethods{IMMEDIATE_ADDRESS,DIRECT_ADDRESS,STRUCT_ADDRESS,REGISTER_
 enum typeOfSymbol {CODE_SYMBOL=1,/* Contains an action like move */DATA_SYMBOL,/*.string or .data*/EXTERNAL_SYMBOL, /* .extern */STRUCT_SYMBOL /* .struct */};
 
 
-
-
-
-
-
 int isRegister(char *name);
 int isNumber(char* number);
 void removeLeftWhiteSpaces(char line[LINE_LEN]);
@@ -41,7 +36,7 @@ int is_system_word(char* word);
 int endOfLine(char *line);
 int addressingMethodType(char* operand,int lineNum);
 int isEmpty(char* word);
-int registerNum(char* register);
+int registerNum(char* theRegister);
 void stringToNumber(int* num,char* numString);
 
 #endif 

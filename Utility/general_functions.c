@@ -159,11 +159,11 @@ int isEmpty(char* word){
     return 1;
 }
 
-int registerNum(char* register){
-    return register[1];
+int registerNum(char* theRegister){
+    return theRegister[1];
 }
 
 void stringToNumber(int* num,char* numString){
     char* tmp;
-    *num = strtol(numString,&temp,10);
+    *num = strtol(numString,&tmp,10);
 }

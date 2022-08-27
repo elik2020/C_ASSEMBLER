@@ -61,7 +61,7 @@ symbolTable* first_pass(char* fileName,int* errorFound,int* entryFound,int* IC,i
             
             if(isOperation(currentWord)){
                 /*printf("start IC is : %d in line: %d\n",*IC,lineCount);*/
-                *(IC)++;
+                (*IC)++;
                 if(currentSymbol != NULL){
                     currentSymbol->symbolType = CODE_SYMBOL;
                 }

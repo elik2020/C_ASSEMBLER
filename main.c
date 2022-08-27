@@ -17,6 +17,7 @@ int main(int argc, char** argv){
             endDC = 0;
             errorFound = 0;
             entryFound = 0;
+            printf("\n\nstarted assembler on file %s\n\n",argv[i]);
 
             head = first_pass(argv[i],&errorFound,&entryFound,&endIC,&endDC);
             print_symbol_table(head);
