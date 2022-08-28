@@ -224,7 +224,7 @@ int changeICByCommand(int numOfOperands,int* IC,char* firstOperand,char* secondO
             return -1;
         }
         
-        addToIC(IC,firstAddressingMethod,0);
+        addToIC(IC,firstAddressingMethod,0);/*is for no previous addressing method*/
         
     }
 
@@ -242,7 +242,7 @@ int changeICByCommand(int numOfOperands,int* IC,char* firstOperand,char* secondO
             return -1;
         }
 
-        addToIC(IC,firstAddressingMethod,0);
+        addToIC(IC,firstAddressingMethod,0);/*is for no previous addressing method*/
 
 
         if(!isDestinationAddressingMethod(theOperation,secondAddressingMethod)){
