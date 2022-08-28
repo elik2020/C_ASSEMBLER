@@ -57,11 +57,13 @@ void removeRightWhiteSpaces(char line[LINE_LEN]);
  * @return int we return 1 if we need to ignore the line, otherwise we return 0
  */
 int ignoreLine(char* line);
-
-void copyCurrentWord(char *word, char *line);
-
-void toNextWord(char *line);
-
+/**
+ * @brief print an error
+ * 
+ * @param error the error
+ * @param line the line the error was in
+ * @param fileName the name of the file
+ */
 void printError(char* error,int line,char* fileName);
 /**
  * @brief checks if the word is a register, operation or a directive
