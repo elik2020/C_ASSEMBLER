@@ -46,9 +46,6 @@ mov r1, #23a
 .data
 .struct
 
-;illegal comma/s
-.data ,3
-
 ;illegal / missing string
 .string "
 .struct 5,

@@ -14,7 +14,7 @@ void second_pass(char* fileName,int isEntry,int endIC,int endDC,symbolTable* hea
     char* currentWord = NULL;
     int IC = 99;
     FILE* entFile = NULL,*extFile = NULL,*operationFile = NULL,*dataFile = NULL,*amFile = NULL;
-
+    /*opening all the files*/
     if(table_contain_extern(head)){
         extFile = open_file(fileName,".ext","w");
     }
@@ -24,41 +24,41 @@ void second_pass(char* fileName,int isEntry,int endIC,int endDC,symbolTable* hea
     amFile = open_file(fileName,".am","r");
     operationFile = open_file(fileName,".oper","w+");
     dataFile = open_file(fileName,".data","w+");
-
+    /*add the finel IC and DC to file*/
     addFinalICAndDC(endIC,endDC,operationFile);
 
-    /*convert_to_base32(116,line);
-    printf("116 is: %s\n",line);*/
+
+
 
     while(!feof(amFile)){
         fgets(line, LINE_LEN, amFile); 
         lineNum++;
-        /*printf("line is: %s\n",line);*/
-        if(ignoreLine(line)){
+
+        if(ignoreLine(line)){/*Check if line is empty or if it start with ;*/
             continue;
         }
 
-        /*printf("line after is: %s\n\n",line);*/
-        currentWord = strtok(line, SPACES);
+
+        currentWord = strtok(line, SPACES);/*get the first word in the line*/
 
         if(isEmpty(currentWord)){
             continue;
         }
         
-        if(checkLabel(currentWord)){
+        if(checkLabel(currentWord)){/*if the first word is a label we skeep it*/
             currentWord = strtok(NULL, SPACES);
         }
         
-        if(isDirective(currentWord)){
-            /*printf("the word is: %s\n\n",currentWord);*/
+        if(isDirective(currentWord)){/*we check if its a directive*/
+
             if(directiveEncoder(head,&IC,lineNum,currentWord,entFile,dataFile) == -1){
                 isError = 1;
             }
             
         }else{
             
-            if(isOperation(currentWord)){
-                /*printf("the word is: %s in line: %d\n\n",currentWord,lineNum);*/
+            if(isOperation(currentWord)){/*we check if its a operation*/
+
                 if(getOperands(head,&IC,operationFile,lineNum,extFile,currentWord) == -1){
                     isError = 1;
                 }
@@ -68,14 +68,14 @@ void second_pass(char* fileName,int isEntry,int endIC,int endDC,symbolTable* hea
         }
     }
 
-    if(isError == 1){
-        /*close_second_pass(fileName,entFile,extFile,operationFile,dataFile,amFile);*/
+    if(isError == 1){/*if we found an error we close all the files we created*/
+        close_second_pass(fileName,entFile,extFile,operationFile,dataFile,amFile);
         printf("error detact\n\n");
     }else{
-        finish_second_pass(fileName,entFile,extFile,operationFile,dataFile,amFile);
+        finish_second_pass(fileName,entFile,extFile,operationFile,dataFile,amFile);/*if ther was no errors we create the object file*/
     }
 
-    free_symbol_table(head);
+    free_symbol_table(head);/*free the sembol tabel we created in the first pass*/
 
 
 }
@@ -87,7 +87,7 @@ void addFinalICAndDC(int endIC, int endDC,FILE* operationFile){
     convert_to_base32((endIC-100),ICToBase32);
     convert_to_base32(endDC,DCToBase32);
     
-
+    /*if the number of the finel IC or DC is lower than 32 so we delet the ! in the start of the encode of the numbers to base 32*/
     if(endDC< 32){
         DCToBase32[0] = DCToBase32[1];
         DCToBase32[1] = '\0';
@@ -146,7 +146,6 @@ void close_second_pass(char *fileName,FILE* entFile,FILE* extFile,FILE* operatio
         fclose(extFile);
         deletingFile(fileName,".ext");
     }
-    deletingFile(fileName,".am");
     deletingFile(fileName,".oper");
     deletingFile(fileName,".data");
 
@@ -227,7 +226,7 @@ void dataEncoder(int* IC,FILE* dataFile,int lineNum){
     char numBase32[3] = {0};
     int num = 0;
 
-    numAfterComma = strtok(NULL,SPACES_AND_COMMA);
+    numAfterComma = strtok(NULL,",");
 
     while(numAfterComma != NULL){
         (*IC)++;
@@ -346,10 +345,10 @@ int getOperands(symbolTable* head,int* IC,FILE* operationFile,int lineNum,FILE* 
             secondOperand[j] = theOperands[i];
             j++;
         }
-        /*printf("the operand is: %s int line : %d\n",firstOperand,lineNum);*/
+
         removeRightWhiteSpaces(secondOperand);
         removeLeftWhiteSpaces(secondOperand);
-        /*printf("the operand after is: %s int line : %d\n\n",secondOperand,lineNum);*/
+
         return encodeOperation(head,IC,numOfOperands,firstOperand,secondOperand,lineNum,operationFile,extFile,theOperation);
     }
     return -1;
@@ -364,7 +363,7 @@ int encodeOperation(symbolTable* head,int* IC,int numOfOperands,char* firstOpera
     
 
     opCode = getOpCode(theOperation);
-    /*printf("opcode is: %d\n",opCode);*/
+
 
     if(numOfOperands == 0){
         (*IC)++;
@@ -392,7 +391,7 @@ int encodeOperation(symbolTable* head,int* IC,int numOfOperands,char* firstOpera
         secondAddressingMethod = addressingMethodType(secondOperandCopy,lineNum);
         
         (*IC)++;
-        /*printf("firstAdress: %d second Adress: %d\n",firstAddressingMethod,secondAddressingMethod);*/
+
 
         convert_to_base32(opCode << 6 | firstAddressingMethod << 4 | secondAddressingMethod << 2,toBase32);
         encoded_to_file(operationFile,toBase32,(*IC));

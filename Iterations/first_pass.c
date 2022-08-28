@@ -8,7 +8,6 @@ symbolTable* first_pass(char* fileName,int* errorFound,int* entryFound,int* IC,i
     symbolTable* currentSymbol = NULL;
     char line[LINE_LEN] = {0};
     char* currentWord = NULL;
-    /*char labelName[LABEL_LEN] = {0};*/
     int lineCount =  0;
     amFile = open_file(fileName,".am","r");
 
@@ -16,12 +15,12 @@ symbolTable* first_pass(char* fileName,int* errorFound,int* entryFound,int* IC,i
 
         fgets(line, LINE_LEN, amFile); 
         lineCount++;
-        /*printf("line is: %s\n",line);*/
-        if(ignoreLine(line)){
+        
+        if(ignoreLine(line)){/*Check if line is empty or if it start with ;*/
             continue;
         }
 
-        /*printf("line after is: %s\n\n",line);*/
+        
         currentWord = strtok(line, SPACES);
 
         if(isEmpty(currentWord)){
@@ -30,9 +29,9 @@ symbolTable* first_pass(char* fileName,int* errorFound,int* entryFound,int* IC,i
 
         
         
-        if(checkLabel(currentWord)){
-            /*printf(" the word is: %s\n",currentWord);*/
-            if(checkLabelName(currentWord)){
+        if(checkLabel(currentWord)){/*check if it's label acceleration*/
+            
+            if(checkLabelName(currentWord)){/*If the label is correct*/
                 if(inSymbolTable(head,currentWord)){
                     printf("label already exist label name: %s in line: %d\n",currentWord,lineCount);
                     *errorFound = 1;
@@ -49,18 +48,18 @@ symbolTable* first_pass(char* fileName,int* errorFound,int* entryFound,int* IC,i
 
         
 
-        if(isDirective(currentWord)){
+        if(isDirective(currentWord)){/*we check if its a directive*/
             if(strcmp(currentWord,".entry") == 0){
                 *entryFound = 1;
             }
-            /*printf("the word is: %s\n\n",currentWord);*/
+
             if(directiveHandler(&head,DC,lineCount,currentWord,currentSymbol) == -1){
                 *errorFound= 1;
             }
         }else{
             
-            if(isOperation(currentWord)){
-                /*printf("start IC is : %d in line: %d\n",*IC,lineCount);*/
+            if(isOperation(currentWord)){/*we check if its a operation*/
+                
                 (*IC)++;
                 if(currentSymbol != NULL){
                     currentSymbol->symbolType = CODE_SYMBOL;
@@ -68,7 +67,7 @@ symbolTable* first_pass(char* fileName,int* errorFound,int* entryFound,int* IC,i
                 if(operationHandler(IC,lineCount,currentWord) == -1){
                     *errorFound= 1;
                 }
-                /*printf("END IC is : %d in line: %d\n\n",*IC,lineCount);*/
+                
             }else{
                 printf("invalid comend in line %d\n",lineCount);
                 
@@ -82,12 +81,10 @@ symbolTable* first_pass(char* fileName,int* errorFound,int* entryFound,int* IC,i
     }
 
     if(*errorFound == 1){
-        printf("IS ERROR\n");
+        printf("WAS ERROR\n");
     }else{
         AddICToData(&head,*IC);
     }
-
-    printf("finel IC: %d finle DC: %d\n",*IC,*DC);
     
     return head;
 
@@ -105,13 +102,13 @@ int operationHandler(int* IC,int lineNum,char* theOperation){
 
     expectedOperands = amountOfOperands(theOperation);
     theOperands = strtok(NULL,"");
-    /*printf("the IC is : %d",*IC);*/
 
+    /*Checking if operation is valid*/
     if(checkOperationLine(expectedOperands,firstOperand,secondOperand,lineNum,theOperands)){
         if(expectedOperands == 0){
             return 1;
         }
-        /*printf("first operand is: %s second operand is: %s in line: %d\n",firstOperand,secondOperand,lineNum);*/
+        /*Changing the IC according to the operation*/
         return changeICByCommand(expectedOperands,IC,firstOperand,secondOperand,lineNum,theOperation);
     }
     return -1;
@@ -130,6 +127,7 @@ int checkOperationLine(int numOfOperands,char* firstOperand,char* secondOperand,
     }
 
     if(numOfOperands == 1){
+        /*We get the first operand*/
         removeRightWhiteSpaces(theOperands);
         for(i = 0;i<strlen(theOperands);i++){
             firstOperand[i] = theOperands[i];
@@ -137,12 +135,13 @@ int checkOperationLine(int numOfOperands,char* firstOperand,char* secondOperand,
         removeRightWhiteSpaces(firstOperand);
         removeLeftWhiteSpaces(firstOperand);
         if(operandError(firstOperand,lineNum)){
-            return 0;
+            return 0;/*The operand contains errors*/
         }
         
     }
 
     if(numOfOperands == 2){
+        /*We get the operands*/
         for(i = 0;i<strlen(theOperands) && theOperands[i] != ',';i++){
             firstOperand[i] = theOperands[i];
         }
@@ -154,7 +153,7 @@ int checkOperationLine(int numOfOperands,char* firstOperand,char* secondOperand,
         removeRightWhiteSpaces(firstOperand);
         removeLeftWhiteSpaces(firstOperand);
         if(operandError(firstOperand,lineNum)){
-            return 0;
+            return 0;/*The operand contains errors*/
         }
         ++i;
         j = 0;
@@ -162,12 +161,12 @@ int checkOperationLine(int numOfOperands,char* firstOperand,char* secondOperand,
             secondOperand[j] = theOperands[i];
             j++;
         }
-        /*printf("the operand is: %s int line : %d\n",secondOperand,lineNum);*/
+
         removeRightWhiteSpaces(secondOperand);
         removeLeftWhiteSpaces(secondOperand);
-        /*printf("the operand after is: %s int line : %d\n\n",secondOperand,lineNum);*/
+        
         if(operandError(secondOperand,lineNum)){
-            return 0;
+            return 0;/*The operand contains errors*/
         }
 
     }
@@ -177,7 +176,7 @@ int checkOperationLine(int numOfOperands,char* firstOperand,char* secondOperand,
 
 int operandError(char* operand,int lineNum){
     int i;
-    /*printf("the operand is: %s int line : %d\n",operand,lineNum);*/
+
     for(i = 0;i<strlen(operand);i++){
         if(operand[i] == '\t' || operand[i] == ' '){
             printf("spaces in operand line : %d\n",lineNum);
@@ -216,7 +215,7 @@ int changeICByCommand(int numOfOperands,int* IC,char* firstOperand,char* secondO
     if(numOfOperands == 1){
         firstAddressingMethod = addressingMethodType(firstOperand,lineNum);
 
-        if(firstAddressingMethod == -1){
+        if(firstAddressingMethod == -1){/* -1 is an error of  addressing method*/
             return -1;
         }
         
@@ -224,9 +223,9 @@ int changeICByCommand(int numOfOperands,int* IC,char* firstOperand,char* secondO
             printf("not the right adressing Method to the destination Operand in line: %d\n",lineNum);
             return -1;
         }
-        /*printf("the IC before is: %d the only adrresing mode is: %d in line: %d\n",*IC,firstAddressingMethod,lineNum);*/
+        
         addToIC(IC,firstAddressingMethod,0);
-        /*printf("ONLY after IC is: %d in line: %d\n\n",*IC,lineNum);*/
+        
     }
 
     if(numOfOperands == 2){
@@ -234,7 +233,7 @@ int changeICByCommand(int numOfOperands,int* IC,char* firstOperand,char* secondO
         firstAddressingMethod = addressingMethodType(firstOperand,lineNum);
         secondAddressingMethod = addressingMethodType(secondOperand,lineNum);
         
-        if(firstAddressingMethod == -1 || secondAddressingMethod == -1){
+        if(firstAddressingMethod == -1 || secondAddressingMethod == -1){/* -1 is an error of  addressing method*/
             return -1;
         }
 
@@ -242,17 +241,17 @@ int changeICByCommand(int numOfOperands,int* IC,char* firstOperand,char* secondO
             printf("not the right adressing Method to the source Operand in line: %d \n",lineNum);
             return -1;
         }
-        /*printf("the IC before is: %d the first adrresing mode is: %d in line: %d\n",*IC,firstAddressingMethod,lineNum);*/
+
         addToIC(IC,firstAddressingMethod,0);
-        /*printf("FIRST after IC is: %d in line: %d\n\n",*IC,lineNum);*/
+
 
         if(!isDestinationAddressingMethod(theOperation,secondAddressingMethod)){
             printf("not the right adressing Method to the destination Operand in line: %d \n",lineNum);
             return -1;
         }
-        /*printf("the IC before is: %d the second adrresing mode is: %d in line: %d\n",*IC,secondAddressingMethod,lineNum);*/
+
         addToIC(IC,secondAddressingMethod,firstAddressingMethod);
-        /*printf("SECOND after IC is: %d in line: %d\n\n",*IC,lineNum);*/
+
 
     }
 

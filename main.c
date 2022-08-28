@@ -17,13 +17,15 @@ int main(int argc, char** argv){
             errorFound = 0;
             entryFound = 0;
             printf("\n\nstarted assembler on file %s\n\n",argv[i]);
-            /*pre_assembler(argv[i],&errorFound);*/
+            pre_assembler(argv[i],&errorFound);
+
             if(errorFound == 1){
                 continue;
             }
 
+            printf("\nstarted assembler on file %s.am\n\n",argv[i]);
             head = first_pass(argv[i],&errorFound,&entryFound,&endIC,&endDC);
-            print_symbol_table(head);
+            
             if(errorFound == 1){
                 continue;
             }
