@@ -26,7 +26,9 @@ void second_pass(char* fileName,int isEntry,int endIC,int endDC,symbolTable* hea
     dataFile = open_file(fileName,".data","w+");
 
     addFinalICAndDC(endIC,endDC,operationFile);
-    
+
+    /*convert_to_base32(116,line);
+    printf("116 is: %s\n",line);*/
 
     while(!feof(amFile)){
         fgets(line, LINE_LEN, amFile); 

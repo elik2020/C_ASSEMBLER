@@ -13,6 +13,6 @@
 int check_macro(char* line,FILE* asFile,macro_table** head,FILE* amFile);
 void replace_macro(macro_table* head,char* macroName,FILE* amFile,FILE* asFile);
 void add_to_macro_table(macro_table** head,char* macroName,FILE* asFile,int startIndex);
-void pre_assembler(char* fileNmae);
+void pre_assembler(char* fileNmae,int* isError);
 
 #endif 

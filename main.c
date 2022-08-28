@@ -12,12 +12,15 @@ int main(int argc, char** argv){
         return 0;
     }else{
         for(i = 1;i<argc;i++){
-            /*pre_assembler(argv[i]);*/
             endIC = 100;
             endDC = 0;
             errorFound = 0;
             entryFound = 0;
             printf("\n\nstarted assembler on file %s\n\n",argv[i]);
+            /*pre_assembler(argv[i],&errorFound);*/
+            if(errorFound == 1){
+                continue;
+            }
 
             head = first_pass(argv[i],&errorFound,&entryFound,&endIC,&endDC);
             print_symbol_table(head);

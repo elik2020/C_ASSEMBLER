@@ -14,7 +14,6 @@ int check_macro(char* line,FILE* asFile,macro_table** head,FILE* amFile){
     int startIndex;   
 
     lineSeparated = strtok(line,SPACES_AND_NEWLINE);/*we get the first word in the line*/
-    printf("\nthe start: %s\n",lineSeparated);
     
     if((*head) != NULL && lineSeparated != NULL && strcmp(lineSeparated,"macro") != 0){/*If the line is not a macro definition*/
         if(in_macro_table(*head,lineSeparated)){/*We check if it's a macro name*/
@@ -97,7 +96,7 @@ void add_to_macro_table(macro_table** head,char* macroName,FILE* asFile,int star
  * 
  * @param fileNmae the name of the file to pre-assemble
  */
-void pre_assembler(char* fileNmae){
+void pre_assembler(char* fileNmae,int* isError){
     FILE* asFile = NULL;
     FILE* amFile = NULL;
     macro_table* head = NULL;
@@ -106,7 +105,8 @@ void pre_assembler(char* fileNmae){
 
     asFile = open_file(fileNmae,".as","r");
     if(asFile == NULL){/*Check the file was opened*/
-        printf("Couldn't open %s.as",fileNmae);
+        printf("Couldn't open %s.as\n",fileNmae);
+        *isError = 1;
         return;
     }
 
